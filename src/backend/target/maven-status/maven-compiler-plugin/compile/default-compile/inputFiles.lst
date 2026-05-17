@@ -1,6 +1,5 @@
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\BackendApplication.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\common\entity\BaseEntity.java
-C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\config\JpaAuditingConfig.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\auth\controller\AuthController.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\auth\dto\AuthResponse.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\auth\dto\CurrentUserResponse.java
@@ -11,8 +10,6 @@ C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\auth\service\
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\auth\service\impl\AuthServiceImpl.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\users\model\User.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\users\repository\UserRepository.java
-C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\vendors\model\Vendor.java
-C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\modules\vendors\repository\VendorRepository.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\security\config\SecurityConfig.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\security\jwt\JwtFilter.java
 C:\AMAZONAS\src\backend\src\main\java\com\amazonas\backend\security\jwt\JwtService.java
