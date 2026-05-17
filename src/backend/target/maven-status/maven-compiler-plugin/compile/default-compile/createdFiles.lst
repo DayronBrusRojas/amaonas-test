@@ -1,0 +1,8 @@
+com\amazonas\backend\modules\users\repository\UserRepository.class
+com\amazonas\backend\config\JpaAuditingConfig.class
+com\amazonas\backend\modules\users\model\User.class
+com\amazonas\backend\modules\auth\enums\Role.class
+com\amazonas\backend\common\entity\BaseEntity.class
+com\amazonas\backend\modules\vendors\repository\VendorRepository.class
+com\amazonas\backend\modules\vendors\model\Vendor.class
+com\amazonas\backend\BackendApplication.class

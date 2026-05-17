@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.amazonas.backend.BackendApplicationTests
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.175 s -- in com.amazonas.backend.BackendApplicationTests
