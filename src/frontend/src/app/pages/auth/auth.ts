@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, Input, OnChanges, Output, EventEmitter } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 type AuthView = 'login' | 'register';
@@ -17,8 +17,15 @@ interface UserAccount {
   templateUrl: './auth.html',
   styleUrl: './auth.css',
 })
-export class Auth {
+export class Auth implements OnChanges {
+
+  @Input() accessNotice = '';
+  @Input() initialView: AuthView = 'login';
+
+  @Output() closed = new EventEmitter<void>(); // 👈 CLAVE
+
   view: AuthView = 'login';
+
   recoverySent = false;
   successMessage = '';
   errorMessage = '';
@@ -34,6 +41,10 @@ export class Auth {
     password: '',
     confirmPassword: ''
   };
+
+  ngOnChanges(): void {
+    this.view = this.initialView;
+  }
 
   get isLogin(): boolean {
     return this.view === 'login';
@@ -78,7 +89,7 @@ export class Auth {
     const accounts = this.getAccounts();
     const email = this.register.email.trim().toLowerCase();
 
-    if (accounts.some(account => account.email === email)) {
+    if (accounts.some(a => a.email === email)) {
       this.errorMessage = 'Este correo ya está registrado.';
       return;
     }
@@ -89,10 +100,7 @@ export class Auth {
       password: this.register.password
     });
 
-    localStorage.setItem(
-      'maquetasAccounts',
-      JSON.stringify(accounts)
-    );
+    localStorage.setItem('maquetasAccounts', JSON.stringify(accounts));
 
     this.login.email = email;
     this.view = 'login';
@@ -103,12 +111,23 @@ export class Auth {
     this.clearMessages();
 
     if (!this.login.email.trim()) {
-      this.errorMessage =
-        'Escribe tu correo electrónico.';
+      this.errorMessage = 'Escribe tu correo electrónico.';
       return;
     }
 
     this.recoverySent = true;
+    this.successMessage = 'Se envió el enlace de recuperación (simulado).';
+  }
+
+  closeModal(): void {
+    this.clearMessages();
+
+    this.login = { email: '', password: '' };
+    this.register = { name: '', email: '', password: '', confirmPassword: '' };
+
+    this.view = 'login';
+
+    this.closed.emit(); // 👈 IMPORTANTE
   }
 
   private clearMessages(): void {
@@ -117,37 +136,14 @@ export class Auth {
     this.errorMessage = '';
   }
 
-  private findAccount(
-    email: string
-  ): UserAccount | undefined {
+  private findAccount(email: string): UserAccount | undefined {
     return this.getAccounts().find(
-      account =>
-        account.email ===
-        email.trim().toLowerCase()
+      a => a.email === email.trim().toLowerCase()
     );
   }
 
   private getAccounts(): UserAccount[] {
-    const saved =
-      localStorage.getItem('maquetasAccounts');
-
-    return saved
-      ? JSON.parse(saved)
-      : [];
+    const saved = localStorage.getItem('maquetasAccounts');
+    return saved ? JSON.parse(saved) : [];
   }
-  closeModal(): void {
-  this.clearMessages();
-
-  this.login = {
-    email: '',
-    password: ''
-  };
-
-  this.register = {
-    name: '',
-    email: '',
-    password: '',
-    confirmPassword: ''
-  };
-}
 }
