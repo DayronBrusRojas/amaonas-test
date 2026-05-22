@@ -1,0 +1,80 @@
+<header class="site-header">
+
+  <!-- BRAND -->
+  <button
+    class="brand"
+    type="button"
+    (click)="catalogClicked.emit(); closeMenu()"
+    aria-label="Ir al inicio">
+
+    <span class="brand-mark">MA</span>
+
+    <span class="brand-copy">
+      <strong>Maquetas Amazonas</strong>
+      <small>Lima, Perú</small>
+    </span>
+
+  </button>
+
+  <!-- HAMBURGUESA -->
+  <button class="hamburger" type="button" (click)="toggleMenu()">
+    ☰
+  </button>
+
+  <!-- NAV -->
+  <nav
+    class="main-nav"
+    [class.open]="menuOpen"
+    aria-label="Navegacion principal">
+
+    <button type="button" (click)="catalogClicked.emit(); closeMenu()">
+      Inicio
+    </button>
+
+    <button type="button" (click)="closeMenu()">
+      Nosotros
+    </button>
+
+    <button
+      type="button"
+      [class.active]="activePage === 'catalog' || activePage === 'detail'"
+      (click)="catalogClicked.emit(); closeMenu()">
+
+      Catálogo
+    </button>
+
+    <button type="button" (click)="closeMenu()">
+      Categorías
+    </button>
+
+  </nav>
+
+  <!-- AUTH -->
+  <div class="auth-actions" [class.open]="menuOpen">
+
+    <button
+      class="login-button"
+      type="button"
+      (click)="loginClicked.emit(); closeMenu()">
+
+      Iniciar Sesión
+    </button>
+
+    <button
+      class="register-button"
+      type="button"
+      (click)="registerClicked.emit(); closeMenu()">
+
+      Registrarse
+    </button>
+
+  </div>
+
+</header>
+
+<!-- BACKDROP -->
+<div
+  class="menu-backdrop"
+  *ngIf="menuOpen"
+  (click)="closeMenu()">
+</div>
