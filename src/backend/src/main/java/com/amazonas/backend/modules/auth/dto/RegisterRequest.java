@@ -18,7 +18,7 @@ public class RegisterRequest {
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
-    @Size(max = 15)
+    @Size(max = 15, message = "El teléfono debe tener como máximo 15 caracteres")
     private String telefono;
 
     // =========================
