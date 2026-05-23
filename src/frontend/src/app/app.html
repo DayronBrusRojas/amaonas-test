@@ -1,0 +1,31 @@
+<main class="page-shell">
+
+  <app-header
+    *ngIf="page !== 'auth'"
+    [activePage]="page"
+    (catalogClicked)="showCatalog()"
+    (loginClicked)="requestAccess('comprar')"
+    (registerClicked)="showRegister()"
+  ></app-header>
+
+  <app-catalog
+    *ngIf="page === 'catalog'"
+    (viewDetails)="showDetails($event)"
+  ></app-catalog>
+
+  <app-catalog-detail
+    *ngIf="page === 'detail'"
+    [model]="selectedModel"
+    (back)="showCatalog()"
+    (accessRequested)="requestAccess($event)"
+    (relatedSelected)="showDetails($event)"
+  ></app-catalog-detail>
+
+ <app-auth
+  *ngIf="page === 'auth'"
+  [accessNotice]="accessNotice"
+  [initialView]="authView"
+  (closed)="closeAuth()">
+</app-auth>
+
+</main>
