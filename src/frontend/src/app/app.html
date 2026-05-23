@@ -1,7 +1,7 @@
 <main class="page-shell">
 
   <app-header
-    *ngIf="page !== 'auth'"
+    *ngIf="page !== 'auth' && page !== 'vendedor'"
     [activePage]="page"
     (catalogClicked)="showCatalog()"
     (loginClicked)="requestAccess('comprar')"
@@ -21,11 +21,16 @@
     (relatedSelected)="showDetails($event)"
   ></app-catalog-detail>
 
- <app-auth
-  *ngIf="page === 'auth'"
-  [accessNotice]="accessNotice"
-  [initialView]="authView"
-  (closed)="closeAuth()">
-</app-auth>
+  <app-auth
+    *ngIf="page === 'auth'"
+    [accessNotice]="accessNotice"
+    [initialView]="authView"
+    (closed)="closeAuth()">
+  </app-auth>
+
+  <app-navbar-vendedor
+    *ngIf="page === 'vendedor'"
+    (salir)="salirPanel()">
+  </app-navbar-vendedor>
 
 </main>

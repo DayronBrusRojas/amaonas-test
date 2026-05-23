@@ -5,8 +5,9 @@ import { CatalogDetailComponent } from './pages/catalog-detail/catalog-detail.co
 import { CatalogComponent } from './pages/catalog/catalog.component';
 import { MODELS, ModelItem } from './pages/data/model';
 import { HeaderComponent } from './pages/header/header.component';
+import { NavbarVendedorComponent } from './pages/navbar-vendedor/navbar-vendedor.component';
 
-type PageView = 'catalog' | 'detail' | 'auth';
+type PageView = 'catalog' | 'detail' | 'auth' | 'vendedor';
 type AuthView = 'login' | 'register';
 
 @Component({
@@ -17,14 +18,15 @@ type AuthView = 'login' | 'register';
     Auth,
     CatalogComponent,
     CatalogDetailComponent,
-    HeaderComponent
+    HeaderComponent,
+    NavbarVendedorComponent,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class AppComponent {
 
-  page: PageView = 'catalog';
+  page: PageView = 'vendedor';
   previousPage: PageView = 'catalog';
 
   selectedModel: ModelItem = MODELS[0];
@@ -47,8 +49,8 @@ export class AppComponent {
     this.previousPage = this.page === 'auth' ? this.previousPage : this.page;
 
     this.accessNotice = action === 'comprar'
-      ? 'Para comprar una maqueta debes iniciar sesión o registrarte.'
-      : 'Para personalizar tu maqueta debes iniciar sesión o registrarte.';
+      ? 'Para comprar una maqueta debes iniciar sesion o registrarte.'
+      : 'Para personalizar tu maqueta debes iniciar sesion o registrarte.';
 
     this.authView = 'login';
     this.page = 'auth';
@@ -64,7 +66,15 @@ export class AppComponent {
   }
 
   closeAuth(): void {
-    this.page = this.previousPage; // 👈 vuelve al catálogo o donde estabas
+    this.page = this.previousPage;
     this.accessNotice = '';
+  }
+
+  showVendedor(): void {
+    this.page = 'vendedor';
+  }
+
+  salirPanel(): void {
+    this.page = 'catalog';
   }
 }
