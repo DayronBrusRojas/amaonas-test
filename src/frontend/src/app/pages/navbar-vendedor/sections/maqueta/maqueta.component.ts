@@ -12,6 +12,16 @@ export interface MaquetaStat {
   iconColor: string;
 }
 
+export interface AnalisisStat {
+  id: string;
+  label: string;
+  value: string | number;
+  valueColor: string;
+  subtext?: string;
+  icon: string;
+  iconColor: string;
+}
+
 export interface NuevaMaquetaForm {
   nombre: string;
   categoria: string;
@@ -49,6 +59,42 @@ export class MaquetaComponent {
       label: 'Sin Configurar',
       value: 12,
       valueColor: '#f97316',
+      iconColor: '#f97316',
+    },
+  ];
+
+  analisisStats: AnalisisStat[] = [
+    {
+      id: 'total-solicitudes',
+      label: 'Total Solicitudes',
+      value: 0,
+      valueColor: '#1a2a3a',
+      icon: 'bar-chart',
+      iconColor: '#3b82f6',
+    },
+    {
+      id: 'productos-solicitados',
+      label: 'Productos Solicitados',
+      value: 0,
+      valueColor: '#1a2a3a',
+      icon: 'trending-up',
+      iconColor: '#22c55e',
+    },
+    {
+      id: 'categoria-popular',
+      label: 'Categoría Popular',
+      value: 'N/A',
+      valueColor: '#8b5cf6',
+      subtext: '0 solicitudes',
+      icon: 'star',
+      iconColor: '#8b5cf6',
+    },
+    {
+      id: 'sin-solicitudes',
+      label: 'Sin Solicitudes',
+      value: 12,
+      valueColor: '#f97316',
+      icon: 'alert-circle',
       iconColor: '#f97316',
     },
   ];

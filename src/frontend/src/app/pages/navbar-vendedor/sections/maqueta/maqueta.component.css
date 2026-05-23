@@ -413,3 +413,140 @@
     align-items: flex-start;
   }
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   ANÁLISIS DE PRODUCTOS
+═══════════════════════════════════════════════════════════════ */
+.analisis-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.analisis-header {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.analisis-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a2a3a;
+  margin: 0;
+}
+
+.analisis-subtitle {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* ─── 4-column stat row ─── */
+.analisis-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+}
+
+.analisis-stat-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: box-shadow 0.15s;
+}
+
+.analisis-stat-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.analisis-stat-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 4px;
+}
+
+.analisis-stat-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.analisis-stat-icon {
+  display: grid;
+  place-items: center;
+}
+
+.astat-icon {
+  width: 20px;
+  height: 20px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.analisis-stat-value {
+  font-size: 28px;
+  font-weight: 700;
+  margin: 0;
+  line-height: 1;
+}
+
+.analisis-stat-subtext {
+  font-size: 11px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ─── empty state ─── */
+.analisis-empty-card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 36px 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.analisis-empty-icon-wrap {
+  color: #cbd5e1;
+}
+
+.analisis-empty-icon {
+  width: 40px;
+  height: 40px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.analisis-empty-text {
+  font-size: 14px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+@media (max-width: 900px) {
+  .analisis-stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .analisis-stats-row {
+    grid-template-columns: 1fr;
+  }
+}
