@@ -22,6 +22,13 @@ export interface AnalisisStat {
   iconColor: string;
 }
 
+export interface ProductoSinSolicitud {
+  id: string;
+  nombre: string;
+  categoria: string;
+  imagenUrl: string;
+}
+
 export interface NuevaMaquetaForm {
   nombre: string;
   categoria: string;
@@ -100,6 +107,33 @@ export class MaquetaComponent {
   ];
 
   categorias: string[] = ['Educativa', 'Arquitectura', 'Ciencia', 'Tecnología'];
+
+  categoriaColorMap: Record<string, string> = {
+    'Ciencia':       '#64748b',
+    'Arquitectura':  '#64748b',
+    'Educativo':     '#64748b',
+    'Inclusivo':     '#3b82f6',
+    'Tecnología':    '#64748b',
+  };
+
+  productosSinSolicitudes: ProductoSinSolicitud[] = [
+    { id: '1',  nombre: 'Sistema Digestivo',   categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/digestivo/200/130'   },
+    { id: '2',  nombre: 'Célula Animal',        categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/celula/200/130'      },
+    { id: '3',  nombre: 'Colegio Primaria',    categoria: 'Arquitectura',  imagenUrl: 'https://picsum.photos/seed/primaria/200/130'    },
+    { id: '4',  nombre: 'Colegio Secundaria',  categoria: 'Arquitectura',  imagenUrl: 'https://picsum.photos/seed/secundaria/200/130'  },
+    { id: '5',  nombre: 'Sistema Solar',       categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/solar/200/130'       },
+    { id: '6',  nombre: 'Ciclo del Agua',      categoria: 'Educativo',     imagenUrl: 'https://picsum.photos/seed/agua/200/130'        },
+    { id: '7',  nombre: 'Volcán en Erupción', categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/volcan/200/130'      },
+    { id: '8',  nombre: 'Alfabeto Braille',    categoria: 'Inclusivo',     imagenUrl: 'https://picsum.photos/seed/braille/200/130'     },
+    { id: '9',  nombre: 'Mapamundi Táctil',    categoria: 'Inclusivo',     imagenUrl: 'https://picsum.photos/seed/mapamundi/200/130'   },
+    { id: '10', nombre: 'Capas de la Tierra',  categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/tierra/200/130'      },
+    { id: '11', nombre: 'ADN - Estructura',    categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/adn/200/130'         },
+    { id: '12', nombre: 'Ecosistema Acuático', categoria: 'Educativo',     imagenUrl: 'https://picsum.photos/seed/ecosistema/200/130'  },
+  ];
+
+  getCategoriaColor(cat: string): string {
+    return this.categoriaColorMap[cat] ?? '#64748b';
+  }
 
   showForm = false;
   formTab: FormTab = 'catalogo';

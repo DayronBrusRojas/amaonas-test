@@ -239,6 +239,45 @@
       <p class="analisis-empty-text">No hay solicitudes registradas aún</p>
     </div>
 
+    <!-- ── PRODUCTOS SIN SOLICITUDES ── -->
+    @if (productosSinSolicitudes.length > 0) {
+      <div class="sin-sol-panel">
+
+        <div class="sin-sol-header">
+          <div class="sin-sol-title-row">
+            <svg viewBox="0 0 24 24" class="sin-sol-icon" aria-hidden="true">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span class="sin-sol-title">
+              Productos Sin Solicitudes ({{ productosSinSolicitudes.length }})
+            </span>
+          </div>
+          <p class="sin-sol-subtitle">
+            Estos productos no han recibido ninguna solicitud. Considera promocionarlos o evaluar su demanda.
+          </p>
+        </div>
+
+        <div class="sin-sol-grid">
+          @for (producto of productosSinSolicitudes; track producto.id) {
+            <div class="sin-sol-card">
+              <img
+                class="sin-sol-img"
+                [src]="producto.imagenUrl"
+                [alt]="producto.nombre"
+                loading="lazy">
+              <p class="sin-sol-nombre">{{ producto.nombre }}</p>
+              <p class="sin-sol-cat" [style.color]="getCategoriaColor(producto.categoria)">
+                {{ producto.categoria }}
+              </p>
+            </div>
+          }
+        </div>
+
+      </div>
+    }
+
   </div>
 
 </div>
