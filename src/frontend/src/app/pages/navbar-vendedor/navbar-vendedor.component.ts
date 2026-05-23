@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { DashboardComponent } from './sections/dashboard/dashboard.component';
+import { MaquetaComponent } from './sections/maqueta/maqueta.component';
 
 export type VendedorTab =
   | 'dashboard'
@@ -20,7 +21,7 @@ export interface NavItem {
 @Component({
   selector: 'app-navbar-vendedor',
   standalone: true,
-  imports: [CommonModule, DashboardComponent],
+  imports: [CommonModule, DashboardComponent, MaquetaComponent],
   templateUrl: './navbar-vendedor.component.html',
   styleUrl: './navbar-vendedor.component.css',
 })

@@ -1,0 +1,180 @@
+<div class="maqueta-wrapper">
+
+  <!-- ══════════════════════ HEADER ══════════════════════ -->
+  <div class="maqueta-header">
+    <div class="maqueta-title-group">
+      <h2 class="maqueta-title">Gestión de Maquetas</h2>
+      <p class="maqueta-subtitle">Define los materiales y costos de cada maqueta</p>
+    </div>
+    <button class="btn-configurar" type="button" (click)="abrirForm()">
+      <svg viewBox="0 0 24 24" class="btn-icon" aria-hidden="true">
+        <line x1="12" y1="5" x2="12" y2="19"/>
+        <line x1="5" y1="12" x2="19" y2="12"/>
+      </svg>
+      Configurar Maqueta
+    </button>
+  </div>
+
+  <!-- ══════════════════════ STAT CARDS ══════════════════════ -->
+  <div class="stats-row">
+    @for (stat of stats; track stat.id) {
+      <div class="stat-card">
+        <div class="stat-card-top">
+          <span class="stat-label">{{ stat.label }}</span>
+          <div class="stat-icon-wrap" [style.color]="stat.iconColor">
+            <svg viewBox="0 0 24 24" class="stat-icon" aria-hidden="true">
+              <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+              <polyline points="2 17 12 22 22 17"/>
+              <polyline points="2 12 12 17 22 12"/>
+            </svg>
+          </div>
+        </div>
+        <p class="stat-value" [style.color]="stat.valueColor">{{ stat.value }}</p>
+      </div>
+    }
+  </div>
+
+  <!-- ══════════════════════ EMPTY STATE ══════════════════════ -->
+  @if (configuradas === 0 && !showForm) {
+    <div class="empty-state-card">
+      <div class="empty-icon-wrap">
+        <svg viewBox="0 0 24 24" class="empty-icon" aria-hidden="true">
+          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+          <polyline points="2 17 12 22 22 17"/>
+          <polyline points="2 12 12 17 22 12"/>
+        </svg>
+      </div>
+      <p class="empty-title">No hay maquetas configuradas</p>
+      <p class="empty-subtitle">Comienza definiendo los materiales y costos de tus maquetas</p>
+      <button class="btn-configurar-primera" type="button" (click)="abrirForm()">
+        <svg viewBox="0 0 24 24" class="btn-icon" aria-hidden="true">
+          <line x1="12" y1="5" x2="12" y2="19"/>
+          <line x1="5" y1="12" x2="19" y2="12"/>
+        </svg>
+        Configurar Primera Maqueta
+      </button>
+    </div>
+  }
+
+  <!-- ══════════════════════ CONFIGURAR FORM ══════════════════════ -->
+  @if (showForm) {
+    <div class="config-panel">
+
+      <p class="config-panel-title">Configurar Nueva Maqueta</p>
+
+      <!-- TABS -->
+      <div class="config-tabs">
+        <button
+          class="config-tab"
+          type="button"
+          [class.active]="formTab === 'catalogo'"
+          (click)="formTab = 'catalogo'">
+          Maqueta del Catálogo
+        </button>
+        <button
+          class="config-tab"
+          type="button"
+          [class.active]="formTab === 'nueva'"
+          (click)="formTab = 'nueva'">
+          Crear Nueva Maqueta
+        </button>
+      </div>
+
+      <!-- TAB: MAQUETA DEL CATÁLOGO -->
+      @if (formTab === 'catalogo') {
+        <div class="config-form-card">
+          <div class="form-field">
+            <label class="field-label">Seleccionar Maqueta del Catálogo <span class="required">*</span></label>
+            <select class="field-select" [(ngModel)]="form.maquetaSeleccionada">
+              <option value="">Seleccionar maqueta...</option>
+            </select>
+          </div>
+        </div>
+      }
+
+      <!-- TAB: CREAR NUEVA MAQUETA -->
+      @if (formTab === 'nueva') {
+        <div class="config-form-card">
+          <div class="form-row">
+            <div class="form-field">
+              <label class="field-label">Nombre de la Maqueta <span class="required">*</span></label>
+              <input
+                class="field-input"
+                type="text"
+                placeholder="Ej: Casa Solar"
+                [(ngModel)]="form.nombre">
+            </div>
+            <div class="form-field">
+              <label class="field-label">Categoría <span class="required">*</span></label>
+              <select class="field-select" [(ngModel)]="form.categoria">
+                @for (cat of categorias; track cat) {
+                  <option [value]="cat">{{ cat }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="field-label">URL de Imagen <span class="required">*</span></label>
+            <input
+              class="field-input"
+              type="text"
+              placeholder="https://ejemplo.com/imagen.jpg"
+              [(ngModel)]="form.urlImagen">
+          </div>
+          <div class="form-field">
+            <label class="field-label">Descripción (opcional)</label>
+            <textarea
+              class="field-textarea"
+              placeholder="Breve descripción de la maqueta"
+              rows="3"
+              [(ngModel)]="form.descripcion">
+            </textarea>
+          </div>
+        </div>
+      }
+
+      <!-- MATERIALES -->
+      <div class="materiales-section">
+        <div class="materiales-header">
+          <span class="materiales-label">Materiales de la Maqueta</span>
+          <button class="btn-agregar-material" type="button">
+            <svg viewBox="0 0 24 24" class="btn-icon" aria-hidden="true">
+              <line x1="12" y1="5" x2="12" y2="19"/>
+              <line x1="5" y1="12" x2="19" y2="12"/>
+            </svg>
+            Agregar Material
+          </button>
+        </div>
+        <div class="materiales-nota">
+          <strong>Nota:</strong> Los costos de compra y venta se sincronizan automáticamente
+          desde el inventario de Materiales. Para modificar los precios, ve a la sección
+          <strong>Materiales</strong>.
+        </div>
+        <div class="materiales-empty">
+          No hay materiales agregados. Click en "Agregar Material" para comenzar.
+        </div>
+      </div>
+
+      <!-- FOOTER -->
+      <div class="config-footer">
+        <button class="btn-guardar" type="button" (click)="guardar()">
+          <svg viewBox="0 0 24 24" class="btn-icon" aria-hidden="true">
+            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+            <polyline points="17 21 17 13 7 13 7 21"/>
+            <polyline points="7 3 7 8 15 8"/>
+          </svg>
+          Guardar Configuración
+        </button>
+        <button class="btn-cancelar" type="button" (click)="cancelar()">
+          <svg viewBox="0 0 24 24" class="btn-icon" aria-hidden="true">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+          Cancelar
+        </button>
+      </div>
+
+    </div>
+  }
+
+</div>
