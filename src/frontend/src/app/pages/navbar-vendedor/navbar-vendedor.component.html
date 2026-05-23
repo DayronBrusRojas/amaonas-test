@@ -94,34 +94,10 @@
     @switch (activeTab) {
 
       @case ('dashboard') {
-        <div class="section-header">
-          <div>
-            <h2 class="section-title">Dashboard</h2>
-            <p class="section-subtitle">Resumen general de tu negocio</p>
-          </div>
-        </div>
-        <div class="placeholder-grid">
-          <div class="placeholder-card">
-            <p class="card-label">Solicitudes Pendientes</p>
-            <p class="card-value">—</p>
-            <p class="card-desc">Nuevas solicitudes de compra</p>
-          </div>
-          <div class="placeholder-card">
-            <p class="card-label">Total Productos</p>
-            <p class="card-value">—</p>
-            <p class="card-desc">Maquetas en catálogo</p>
-          </div>
-          <div class="placeholder-card">
-            <p class="card-label">Stock Bajo</p>
-            <p class="card-value">—</p>
-            <p class="card-desc">Productos con menos de 5 unidades</p>
-          </div>
-          <div class="placeholder-card">
-            <p class="card-label">Materiales Registrados</p>
-            <p class="card-value">—</p>
-            <p class="card-desc">Materiales para presupuestos</p>
-          </div>
-        </div>
+        <app-dashboard
+          (tabSelected)="setTab($event)"
+          (goToSite)="salir.emit()">
+        </app-dashboard>
       }
 
       @case ('maquetas') {
