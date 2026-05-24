@@ -5,11 +5,12 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import com.amazonas.backend.common.entity.BaseEntity;
 import com.amazonas.backend.modules.auth.enums.Role;
 
 import jakarta.persistence.Column;
@@ -21,35 +22,43 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "users")
-public class User extends BaseEntity implements UserDetails {
+
+@SQLDelete(sql = "UPDATE users SET deleted_at = NOW() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
+
+public class User implements UserDetails {
 
     @Id
     private UUID id;
 
-    @Column(nullable = false, length = 255)
-    private String name;
+    @Column(name = "nombre", nullable = false, length = 100)
+    private String nombre;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "password_hash", nullable = false)
-    private String passwordHash;
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
 
-    @Column(nullable = false)
-    private String phone;
+    @Column(name = "telefono", length = 15)
+    private String telefono;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
-    private Role role;
+    @Column(nullable = false)
+    private Role role = Role.CLIENT;
 
-    @Column(name = "email_verified")
-    private Boolean emailVerified = false;
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
 
-    @Column(name = "is_active")
-    private Boolean isActive = true;
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
 
-    @Column(name = "last_login")
-    private LocalDateTime lastLogin;
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
+    // =========================
+    // GETTERS & SETTERS
+    // =========================
 
     public UUID getId() {
         return id;
@@ -59,12 +68,12 @@ public class User extends BaseEntity implements UserDetails {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getEmail() {
@@ -75,20 +84,21 @@ public class User extends BaseEntity implements UserDetails {
         this.email = email;
     }
 
-    public String getPasswordHash() {
-        return passwordHash;
+    @Override
+    public String getPassword() {
+        return password;
     }
 
-    public void setPasswordHash(String passwordHash) {
-        this.passwordHash = passwordHash;
+    public void setPassword(String password) {
+        this.password = password;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getTelefono() {
+        return telefono;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 
     public Role getRole() {
@@ -99,28 +109,28 @@ public class User extends BaseEntity implements UserDetails {
         this.role = role;
     }
 
-    public Boolean getEmailVerified() {
-        return emailVerified;
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
-    public void setEmailVerified(Boolean emailVerified) {
-        this.emailVerified = emailVerified;
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 
-    public Boolean getIsActive() {
-        return isActive;
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
     }
 
-    public void setIsActive(Boolean active) {
-        isActive = active;
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
     }
 
-    public LocalDateTime getLastLogin() {
-        return lastLogin;
+    public LocalDateTime getDeletedAt() {
+        return deletedAt;
     }
 
-    public void setLastLogin(LocalDateTime lastLogin) {
-        this.lastLogin = lastLogin;
+    public void setDeletedAt(LocalDateTime deletedAt) {
+        this.deletedAt = deletedAt;
     }
 
     // =========================
@@ -129,14 +139,10 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(
-            new SimpleGrantedAuthority(role.name())
-        );
-    }
 
-    @Override
-    public String getPassword() {
-        return passwordHash;
+        return List.of(
+                new SimpleGrantedAuthority(role.name())
+        );
     }
 
     @Override
@@ -161,6 +167,6 @@ public class User extends BaseEntity implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return isActive;
+        return deletedAt == null;
     }
 }
