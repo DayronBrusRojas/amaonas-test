@@ -1,12 +1,17 @@
 <main class="page-shell">
-
   <app-header
     *ngIf="page !== 'auth' && page !== 'vendedor'"
     [activePage]="page"
+    (inicioClicked)="showInicio()"
+    (nosotrosClicked)="showNosotros()"
     (catalogClicked)="showCatalog()"
     (loginClicked)="requestAccess('comprar')"
     (registerClicked)="showRegister()"
   ></app-header>
+  
+<app-inicio *ngIf="page === 'inicio'"></app-inicio>
+
+<app-nosotros *ngIf="page === 'nosotros'"></app-nosotros>
 
   <app-catalog
     *ngIf="page === 'catalog'"

@@ -1,11 +1,7 @@
 <header class="site-header">
 
   <!-- BRAND -->
-  <button
-    class="brand"
-    type="button"
-    (click)="catalogClicked.emit(); closeMenu()"
-    aria-label="Ir al inicio">
+  <button class="brand" type="button" (click)="catalogClicked.emit(); closeMenu()" aria-label="Ir al inicio">
 
     <span class="brand-mark">MA</span>
 
@@ -22,22 +18,19 @@
   </button>
 
   <!-- NAV -->
-  <nav
-    class="main-nav"
-    [class.open]="menuOpen"
-    aria-label="Navegacion principal">
+  <nav class="main-nav" [class.open]="menuOpen" aria-label="Navegacion principal">
 
-    <button type="button" (click)="catalogClicked.emit(); closeMenu()">
+    <button type="button" [class.active]="activePage === 'inicio'" (click)="inicioClicked.emit(); closeMenu()">
+
       Inicio
     </button>
 
-    <button type="button" (click)="closeMenu()">
+    <button type="button" [class.active]="activePage === 'nosotros'" (click)="nosotrosClicked.emit(); closeMenu()">
+
       Nosotros
     </button>
 
-    <button
-      type="button"
-      [class.active]="activePage === 'catalog' || activePage === 'detail'"
+    <button type="button" [class.active]="activePage === 'catalog' || activePage === 'detail'"
       (click)="catalogClicked.emit(); closeMenu()">
 
       Catálogo
@@ -52,18 +45,12 @@
   <!-- AUTH -->
   <div class="auth-actions" [class.open]="menuOpen">
 
-    <button
-      class="login-button"
-      type="button"
-      (click)="loginClicked.emit(); closeMenu()">
+    <button class="login-button" type="button" (click)="loginClicked.emit(); closeMenu()">
 
       Iniciar Sesión
     </button>
 
-    <button
-      class="register-button"
-      type="button"
-      (click)="registerClicked.emit(); closeMenu()">
+    <button class="register-button" type="button" (click)="registerClicked.emit(); closeMenu()">
 
       Registrarse
     </button>
@@ -73,8 +60,5 @@
 </header>
 
 <!-- BACKDROP -->
-<div
-  class="menu-backdrop"
-  *ngIf="menuOpen"
-  (click)="closeMenu()">
+<div class="menu-backdrop" *ngIf="menuOpen" (click)="closeMenu()">
 </div>
