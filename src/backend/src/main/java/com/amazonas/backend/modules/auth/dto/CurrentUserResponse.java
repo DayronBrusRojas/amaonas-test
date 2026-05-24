@@ -12,6 +12,23 @@ public class CurrentUserResponse {
     private String telefono;
     private Role role;
 
+    public CurrentUserResponse() {
+    }
+
+    public CurrentUserResponse(
+            UUID id,
+            String nombre,
+            String email,
+            String telefono,
+            Role role
+    ) {
+        this.id = id;
+        this.nombre = nombre;
+        this.email = email;
+        this.telefono = telefono;
+        this.role = role;
+    }
+
     // =========================
     // GETTERS & SETTERS
     // =========================

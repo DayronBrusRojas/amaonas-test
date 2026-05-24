@@ -29,7 +29,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse register(RegisterRequest request) {
 
-        // Verificar si email ya existe
+        // Verificar si el email ya existe
         if (userRepository.existsByEmail(request.getEmail())) {
 
             throw new RuntimeException("El email ya está registrado");
@@ -40,25 +40,25 @@ public class AuthServiceImpl implements AuthService {
 
         user.setId(UUID.randomUUID());
 
-        user.setName(request.getName());
+        user.setNombre(request.getNombre());
 
         user.setEmail(request.getEmail());
 
-        user.setPhone(request.getPhone());
+        user.setTelefono(request.getTelefono());
 
-        user.setPasswordHash(
+        user.setPassword(
                 passwordEncoder.encode(request.getPassword())
         );
 
         user.setRole(Role.CLIENT);
 
-        // Guardar en DB
+        // Guardar usuario
         userRepository.save(user);
 
-        // Generar token
+        // Generar token JWT
         String token = jwtService.generateToken(user.getEmail());
 
-        // Respuesta
+        // Retornar respuesta
         return new AuthResponse(
                 token,
                 user.getEmail(),
@@ -74,10 +74,10 @@ public class AuthServiceImpl implements AuthService {
                         new RuntimeException("Usuario no encontrado")
                 );
 
-        // Validar password
+        // Validar contraseña
         if (!passwordEncoder.matches(
                 request.getPassword(),
-                user.getPasswordHash()
+                user.getPassword()
         )) {
 
             throw new RuntimeException("Contraseña incorrecta");
