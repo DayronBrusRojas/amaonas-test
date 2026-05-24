@@ -6,27 +6,31 @@ import jakarta.validation.constraints.Size;
 
 public class RegisterRequest {
 
-    @NotBlank
-    @Size(min = 3, max = 255)
-    private String name;
+    @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 100)
+    private String nombre;
 
-    @Email
-    @NotBlank
+    @NotBlank(message = "El email es obligatorio")
+    @Email(message = "Email inválido")
     private String email;
 
-    @NotBlank
-    @Size(min = 6)
+    @NotBlank(message = "La contraseña es obligatoria")
+    @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
-    @NotBlank
-    private String phone;
+    @Size(max = 15, message = "El teléfono debe tener como máximo 15 caracteres")
+    private String telefono;
 
-    public String getName() {
-        return name;
+    // =========================
+    // GETTERS & SETTERS
+    // =========================
+
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getEmail() {
@@ -45,11 +49,11 @@ public class RegisterRequest {
         this.password = password;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getTelefono() {
+        return telefono;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 }
