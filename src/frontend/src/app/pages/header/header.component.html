@@ -17,7 +17,11 @@
   </button>
 
   <!-- HAMBURGUESA -->
-  <button class="hamburger" type="button" (click)="toggleMenu()">
+  <button
+    class="hamburger"
+    type="button"
+    (click)="toggleMenu()">
+
     ☰
   </button>
 
@@ -27,14 +31,25 @@
     [class.open]="menuOpen"
     aria-label="Navegacion principal">
 
-    <button type="button" (click)="catalogClicked.emit(); closeMenu()">
+    <!-- INICIO -->
+    <button
+      type="button"
+      [class.active]="activePage === 'inicio'"
+      (click)="inicioClicked.emit(); closeMenu()">
+
       Inicio
     </button>
 
-    <button type="button" (click)="closeMenu()">
+    <!-- NOSOTROS -->
+    <button
+      type="button"
+      [class.active]="activePage === 'nosotros'"
+      (click)="nosotrosClicked.emit(); closeMenu()">
+
       Nosotros
     </button>
 
+    <!-- CATALOGO -->
     <button
       type="button"
       [class.active]="activePage === 'catalog' || activePage === 'detail'"
@@ -43,14 +58,31 @@
       Catálogo
     </button>
 
-    <button type="button" (click)="closeMenu()">
+    <!-- CATEGORIAS -->
+    <button
+      type="button"
+      (click)="closeMenu()">
+
       Categorías
+    </button>
+
+    <!-- MIS SOLICITUDES -->
+    <button
+      type="button"
+      *ngIf="isLoggedIn"
+      [class.active]="activePage === 'requests'"
+      (click)="requestsClicked.emit(); closeMenu()">
+
+      Mis Solicitudes
     </button>
 
   </nav>
 
-  <!-- AUTH -->
-  <div class="auth-actions" [class.open]="menuOpen">
+  <!-- AUTH INVITADO -->
+  <div
+    class="auth-actions"
+    [class.open]="menuOpen"
+    *ngIf="!isLoggedIn; else loggedActions">
 
     <button
       class="login-button"
@@ -69,6 +101,32 @@
     </button>
 
   </div>
+
+  <!-- AUTH USUARIO LOGUEADO -->
+  <ng-template #loggedActions>
+
+    <div
+      class="auth-actions logged-actions"
+      [class.open]="menuOpen">
+
+      <span
+        class="user-chip"
+        aria-label="Usuario conectado">
+
+        &#128100; {{ userName }}
+      </span>
+
+      <button
+        class="login-button"
+        type="button"
+        (click)="logoutClicked.emit(); closeMenu()">
+
+        Salir
+      </button>
+
+    </div>
+
+  </ng-template>
 
 </header>
 
