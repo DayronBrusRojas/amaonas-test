@@ -6,8 +6,10 @@ import { CatalogComponent } from './pages/catalog/catalog.component';
 import { MODELS, ModelItem } from './pages/data/model';
 import { HeaderComponent } from './pages/header/header.component';
 import { NavbarVendedorComponent } from './pages/navbar-vendedor/navbar-vendedor.component';
+import { Inicio } from './pages/inicio/inicio';
+import { Nosotros } from './pages/nosotros/nosotros';
 
-type PageView = 'catalog' | 'detail' | 'auth' | 'vendedor';
+type PageView = 'inicio' | 'nosotros' |'catalog' | 'detail' | 'auth' | 'vendedor';
 type AuthView = 'login' | 'register';
 
 @Component({
@@ -20,6 +22,8 @@ type AuthView = 'login' | 'register';
     CatalogDetailComponent,
     HeaderComponent,
     NavbarVendedorComponent,
+    Inicio,
+    Nosotros
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -38,6 +42,16 @@ export class AppComponent {
     this.page = 'catalog';
     this.accessNotice = '';
   }
+
+  showInicio(): void {
+  this.page = 'inicio';
+  this.accessNotice = '';
+}
+
+showNosotros(): void {
+  this.page = 'nosotros';
+  this.accessNotice = '';
+}
 
   showDetails(model: ModelItem): void {
     this.selectedModel = model;
