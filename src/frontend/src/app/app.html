@@ -9,7 +9,11 @@
     (registerClicked)="showRegister()"
   ></app-header>
   
-<app-inicio *ngIf="page === 'inicio'"></app-inicio>
+<app-inicio
+  *ngIf="page === 'inicio'"
+  (registerClicked)="showRegister()"
+  (catalogClicked)="showCatalog()">
+</app-inicio>
 
 <app-nosotros *ngIf="page === 'nosotros'"></app-nosotros>
 
