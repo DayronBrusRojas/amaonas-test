@@ -7,13 +7,9 @@ import com.amazonas.backend.modules.auth.enums.Role;
 public class CurrentUserResponse {
 
     private UUID id;
-
-    private String name;
-
+    private String nombre;
     private String email;
-
-    private String phone;
-
+    private String telefono;
     private Role role;
 
     public CurrentUserResponse() {
@@ -21,17 +17,21 @@ public class CurrentUserResponse {
 
     public CurrentUserResponse(
             UUID id,
-            String name,
+            String nombre,
             String email,
-            String phone,
+            String telefono,
             Role role
     ) {
         this.id = id;
-        this.name = name;
+        this.nombre = nombre;
         this.email = email;
-        this.phone = phone;
+        this.telefono = telefono;
         this.role = role;
     }
+
+    // =========================
+    // GETTERS & SETTERS
+    // =========================
 
     public UUID getId() {
         return id;
@@ -41,12 +41,12 @@ public class CurrentUserResponse {
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public String getNombre() {
+        return nombre;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
     }
 
     public String getEmail() {
@@ -57,12 +57,12 @@ public class CurrentUserResponse {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getTelefono() {
+        return telefono;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setTelefono(String telefono) {
+        this.telefono = telefono;
     }
 
     public Role getRole() {
