@@ -10,19 +10,40 @@
     </p>
 
     <!-- BUSCADOR -->
-    <app-buscador-inteligente></app-buscador-inteligente>
+    <app-buscador-inteligente
+    (modelSelected)="modelSelected.emit($event)"
+  (requestAccess)="requestAccess.emit($event)">
+</app-buscador-inteligente>
 
     <!-- TAGS -->
     <div class="popular-searches">
-
-      <span>Búsquedas populares:</span>
+      <span class="material-icons">
+        trending_up
+      </span>
+      <span>    Búsquedas populares:</span>
 
       <div class="tags">
-        <button>Sistema Solar</button>
-        <button>Célula Animal</button>
-        <button>Maquetas de Ciencia</button>
-        <button>Modelos Inclusivos</button>
-        <button>Arquitectura</button>
+
+        <button (click)="buscarTag('Sistema Solar')">
+          Sistema Solar
+        </button>
+
+        <button (click)="buscarTag('Celula Animal')">
+          Célula Animal
+        </button>
+
+        <button (click)="buscarTag('Ciencias')">
+          Maquetas de Ciencia
+        </button>
+
+        <button (click)="buscarTag('Inclusivas')">
+          Modelos Inclusivos
+        </button>
+
+        <button (click)="buscarTag('Arquitectura')">
+          Arquitectura
+        </button>
+
       </div>
 
     </div>
@@ -41,13 +62,14 @@
         <p>
           Descubre nuestras maquetas educativas ya disponibles
         </p>
+
         <br>
-        
+
         <button class="catalog-link" type="button" (click)="catalogClicked.emit()">
 
-      Ver maquetas →
+          Ver maquetas →
 
-    </button>
+        </button>
 
       </div>
 

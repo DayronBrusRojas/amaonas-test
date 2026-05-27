@@ -1,1 +1,217 @@
-<p>buscador-inteligente works!</p>
+<div class="search-container">
+
+  <!-- SEARCH BOX -->
+  <div class="search-box">
+
+    <span class="material-icons search-icon">
+      search
+    </span>
+
+    <input
+      type="text"
+      placeholder="Busca maquetas, categorías o materiales..."
+      [(ngModel)]="searchTerm"
+      (input)="buscar()">
+
+    <button
+      *ngIf="searchTerm"
+      class="clear-btn"
+      type="button"
+      (click)="limpiarBusqueda()">
+
+      <span class="material-icons clear-icon">
+        close
+      </span>
+
+    </button>
+
+  </div>
+
+  <!-- RESULTADOS -->
+  <div
+    class="results-container"
+    *ngIf="resultados.length > 0">
+
+    <!-- HEADER -->
+    <div class="results-header">
+
+      Se encontraron
+
+      <span>
+        {{ resultados.length }}
+      </span>
+
+      resultados
+
+    </div>
+
+    <!-- CATEGORIAS -->
+    <div class="section-title">
+      CATEGORÍAS
+    </div>
+
+    <!-- CATEGORY ITEM -->
+    <div class="search-item category-item">
+
+      <div class="item-left">
+
+        <div class="item-icon">
+          <span class="material-icons">
+            category
+          </span>
+        </div>
+
+        <div class="item-content">
+
+          <h4>
+            Ciencia
+          </h4>
+
+          <p>
+            Modelos científicos educativos
+          </p>
+
+        </div>
+
+      </div>
+
+      <span class="material-icons item-arrow">
+        arrow_forward
+      </span>
+
+    </div>
+
+    <div class="search-item category-item">
+
+      <div class="item-left">
+
+        <div class="item-icon">
+          <span class="material-icons">
+            architecture
+          </span>
+        </div>
+
+        <div class="item-content">
+
+          <h4>
+            Arquitectura
+          </h4>
+
+          <p>
+            Maquetas arquitectónicas escolares
+          </p>
+
+        </div>
+
+      </div>
+
+      <span class="material-icons item-arrow">
+        arrow_forward
+      </span>
+
+    </div>
+
+    <div class="search-item category-item">
+
+      <div class="item-left">
+
+        <div class="item-icon">
+          <span class="material-icons">
+            school
+          </span>
+        </div>
+
+        <div class="item-content">
+
+          <h4>
+            Educativo
+          </h4>
+
+          <p>
+            Modelos didácticos generales
+          </p>
+
+        </div>
+
+      </div>
+
+      <span class="material-icons item-arrow">
+        arrow_forward
+      </span>
+
+    </div>
+
+    <!-- PRODUCTOS -->
+    <div class="section-title">
+      PRODUCTOS
+    </div>
+
+    <!-- PRODUCTOS DINAMICOS -->
+    <button
+      class="search-item product-item"
+      *ngFor="let item of resultados"
+      type="button"
+      (click)="abrirDetalle(item)">
+
+      <div class="item-left">
+
+        <img
+          [src]="item.imageUrl"
+          [alt]="item.title"
+          class="product-image">
+
+        <div class="item-content">
+
+          <h4>
+            {{ item.title }}
+          </h4>
+
+          <p>
+            {{ item.description || 'Modelo educativo detallado para aprendizaje interactivo.' }}
+          </p>
+
+          <span class="product-category">
+            {{ item.category }}
+          </span>
+
+        </div>
+
+      </div>
+
+      <span class="material-icons item-arrow">
+        arrow_forward
+      </span>
+
+    </button>
+
+  </div>
+
+  <!-- EMPTY -->
+  <div
+    class="empty-results"
+    *ngIf="searchTerm && resultados.length === 0">
+
+    <span class="material-icons">
+      sentiment_dissatisfied
+    </span>
+
+    <h3>
+      No encontramos resultados
+    </h3>
+
+    <p>
+      Intenta con otra búsqueda o solicita
+      una maqueta personalizada.
+    </p>
+
+    <button
+      type="button"
+      (click)="requestAccess.emit('personalizar')">
+
+      Solicitar maqueta personalizada
+
+    </button>
+
+  </div>
+
+</div>

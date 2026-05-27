@@ -36,7 +36,7 @@ export class RequestFormComponent {
   @Input({ required: true }) model!: ModelItem;
   @Input({ required: true }) mode!: RequestMode;
   @Input() user: SessionUser | null = null;
-
+  @Input() standaloneRequest = false;
   @Output() changedMode = new EventEmitter<RequestMode>();
   @Output() submitted = new EventEmitter<SavedRequest>();
 
@@ -97,6 +97,8 @@ export class RequestFormComponent {
   selectedMaterials: string[] = [];
   selectedExtras: string[] = [];
   successMessage = '';
+
+  
 
   ngOnChanges(): void {
     this.form.fullName = this.user?.name || this.form.fullName || 'Juan';
@@ -160,6 +162,8 @@ export class RequestFormComponent {
     this.successMessage = 'Solicitud enviada correctamente.';
     this.submitted.emit(request);
   }
+
+  
 
   private getSavedRequests(): SavedRequest[] {
     const saved = localStorage.getItem('maquetasRequests');
