@@ -10,7 +10,10 @@
     </p>
 
     <!-- BUSCADOR -->
-    <app-buscador-inteligente></app-buscador-inteligente>
+    <app-buscador-inteligente
+    (modelSelected)="modelSelected.emit($event)"
+  (requestAccess)="requestAccess.emit($event)">
+</app-buscador-inteligente>
 
     <!-- TAGS -->
     <div class="popular-searches">

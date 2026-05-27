@@ -47,9 +47,7 @@
 
     <!-- CATEGORIAS -->
     <div class="section-title">
-
       CATEGORÍAS
-
     </div>
 
     <!-- CATEGORY ITEM -->
@@ -145,15 +143,15 @@
 
     <!-- PRODUCTOS -->
     <div class="section-title">
-
       PRODUCTOS
-
     </div>
 
     <!-- PRODUCTOS DINAMICOS -->
-    <div
+    <button
       class="search-item product-item"
-      *ngFor="let item of resultados">
+      *ngFor="let item of resultados"
+      type="button"
+      (click)="abrirDetalle(item)">
 
       <div class="item-left">
 
@@ -173,9 +171,7 @@
           </p>
 
           <span class="product-category">
-
             {{ item.category }}
-
           </span>
 
         </div>
@@ -186,7 +182,7 @@
         arrow_forward
       </span>
 
-    </div>
+    </button>
 
   </div>
 
@@ -208,8 +204,12 @@
       una maqueta personalizada.
     </p>
 
-    <button type="button">
+    <button
+      type="button"
+      (click)="requestAccess.emit('personalizar')">
+
       Solicitar maqueta personalizada
+
     </button>
 
   </div>
