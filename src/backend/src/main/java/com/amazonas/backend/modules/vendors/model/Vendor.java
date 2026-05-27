@@ -5,8 +5,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
 
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,10 +22,6 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "vendors")
-
-@SQLDelete(sql = "UPDATE vendors SET deleted_at = NOW() WHERE id = ?")
-@SQLRestriction("deleted_at IS NULL")
-
 public class Vendor implements UserDetails {
 
     @Id
@@ -48,16 +42,16 @@ public class Vendor implements UserDetails {
             columnDefinition = "user_role"
     )
     @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.NAMED_ENUM)
-    private Role role = Role.VENDOR;
+    private Role role = Role.ADMIN; // Ajustado por defecto al valor de tu script SQL
+
+    @Column(nullable = false)
+    private Boolean activo = true; // Mapea la columna 'activo' de tu script SQL
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
-
-    @Column(name = "deleted_at")
-    private LocalDateTime deletedAt;
 
     // =========================
     // JPA HOOKS
@@ -126,13 +120,20 @@ public class Vendor implements UserDetails {
         this.role = role;
     }
 
+    public Boolean getActivo() {
+        return activo;
+    }
+
+    public void setActivo(Boolean activo) {
+        this.activo = activo;
+    }
+
     // =========================
     // SPRING SECURITY
     // =========================
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-
         return List.of(
                 new SimpleGrantedAuthority(role.name())
         );
@@ -160,6 +161,6 @@ public class Vendor implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return deletedAt == null;
+        return activo; // Controla la actividad según tu columna 'activo' boolean
     }
 }
