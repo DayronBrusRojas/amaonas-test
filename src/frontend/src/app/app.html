@@ -1,12 +1,22 @@
 <main class="page-shell">
-
   <app-header
     *ngIf="page !== 'auth' && page !== 'vendedor'"
     [activePage]="page"
+    [isLoggedIn]="!!currentUser"
+    [userName]="currentUser?.name || ''"
+    (inicioClicked)="showInicio()"
+    (nosotrosClicked)="showNosotros()"
     (catalogClicked)="showCatalog()"
+    (requestsClicked)="showRequests()"
+    (loginClicked)="showLogin()"
     (loginClicked)="requestAccess('comprar')"
     (registerClicked)="showRegister()"
+    (logoutClicked)="logout()"
   ></app-header>
+  
+<app-inicio *ngIf="page === 'inicio'"></app-inicio>
+
+<app-nosotros *ngIf="page === 'nosotros'"></app-nosotros>
 
   <app-catalog
     *ngIf="page === 'catalog'"
@@ -25,8 +35,28 @@
     *ngIf="page === 'auth'"
     [accessNotice]="accessNotice"
     [initialView]="authView"
-    (closed)="closeAuth()">
-  </app-auth>
+    (closed)="closeAuth()"
+    (authenticated)="completeLogin($event)"
+    ></app-auth>
+  <app-request-form
+    *ngIf="page === 'request'"
+    [model]="selectedModel"
+    [mode]="requestMode"
+    [user]="currentUser"
+    (changedMode)="switchRequestMode($event)"
+    (submitted)="handleRequestSubmitted($event)"
+  ></app-request-form>
+
+  <app-my-requests
+    *ngIf="page === 'requests'"
+    [user]="currentUser"
+  ></app-my-requests>
+
+  <app-footer
+    *ngIf="page !== 'auth' && page !== 'vendedor'"
+    (catalogClicked)="showCatalog()"
+    (loginClicked)="showLogin()"
+  ></app-footer>
 
   <app-navbar-vendedor
     *ngIf="page === 'vendedor'"
