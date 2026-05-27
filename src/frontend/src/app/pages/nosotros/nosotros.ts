@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, EventEmitter, Output } from '@angular/core';
+
 
 @Component({
   selector: 'app-nosotros',
@@ -8,5 +10,5 @@ import { Component } from '@angular/core';
   styleUrl: './nosotros.css',
 })
 export class Nosotros {
-
+  @Output() catalogClicked = new EventEmitter<void>();
 }
