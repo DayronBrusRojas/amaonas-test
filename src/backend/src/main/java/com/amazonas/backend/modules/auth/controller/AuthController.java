@@ -8,10 +8,11 @@ import org.springframework.web.bind.annotation.*;
 import com.amazonas.backend.modules.auth.dto.AuthResponse;
 import com.amazonas.backend.modules.auth.dto.CurrentUserResponse;
 import com.amazonas.backend.modules.auth.dto.LoginRequest;
+import com.amazonas.backend.modules.auth.dto.LoginVendorRequest;
 import com.amazonas.backend.modules.auth.dto.RegisterRequest;
-import com.amazonas.backend.modules.auth.enums.Role;
 import com.amazonas.backend.modules.auth.service.AuthService;
 import com.amazonas.backend.modules.users.model.User;
+import com.amazonas.backend.modules.vendors.model.Vendor;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,10 @@ import lombok.RequiredArgsConstructor;
 public class AuthController {
 
     private final AuthService authService;
+
+    // =========================
+    // CLIENT AUTH
+    // =========================
 
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(
@@ -43,6 +48,24 @@ public class AuthController {
         );
     }
 
+    // =========================
+    // VENDOR AUTH
+    // =========================
+
+    @PostMapping("/vendor/login")
+    public ResponseEntity<AuthResponse> vendorLogin(
+            @Valid @RequestBody LoginVendorRequest request
+    ) {
+
+        return ResponseEntity.ok(
+                authService.vendorLogin(request)
+        );
+    }
+
+    // =========================
+    // CURRENT USER
+    // =========================
+
     @GetMapping("/me")
     public ResponseEntity<?> me(
             @AuthenticationPrincipal UserDetails userDetails
@@ -53,6 +76,10 @@ public class AuthController {
             return ResponseEntity.status(401)
                     .body("Error: usuario no autenticado");
         }
+
+        // =========================
+        // USER
+        // =========================
 
         if (userDetails instanceof User user) {
 
@@ -67,24 +94,24 @@ public class AuthController {
             return ResponseEntity.ok(response);
         }
 
-        try {
+        // =========================
+        // VENDOR
+        // =========================
 
-            String email = userDetails.getUsername();
+        if (userDetails instanceof Vendor vendor) {
 
             CurrentUserResponse response = new CurrentUserResponse(
+                    vendor.getId(),
+                    vendor.getNombre(),
+                    vendor.getEmail(),
                     null,
-                    "Usuario autenticado",
-                    email,
-                    null,
-                    Role.CLIENT
+                    vendor.getRole()
             );
 
             return ResponseEntity.ok(response);
-
-        } catch (Exception e) {
-
-            return ResponseEntity.status(401)
-                    .body("Error al procesar el usuario autenticado");
         }
+
+        return ResponseEntity.status(401)
+                .body("Error al procesar usuario autenticado");
     }
 }
