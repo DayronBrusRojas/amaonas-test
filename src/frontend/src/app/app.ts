@@ -11,7 +11,7 @@ import { Inicio } from './pages/inicio/inicio';
 import { Nosotros } from './pages/nosotros/nosotros';
 import { MyRequestsComponent } from './pages/my-requests/my-requests.component';
 import { RequestFormComponent, RequestMode, SavedRequest, SessionUser } from './pages/request-form/request-form.component';
-
+import { BuscadorInteligente } from './pages/shared/components/buscador-inteligente/buscador-inteligente';
 
 type PageView = 'inicio' | 'nosotros' |'catalog' | 'detail' | 'auth' | 'request' | 'requests'|'vendedor';
 type AuthView = 'login' | 'register';
@@ -30,15 +30,16 @@ type AuthView = 'login' | 'register';
     Inicio,
     Nosotros,
     MyRequestsComponent,
-    RequestFormComponent
+    RequestFormComponent,
+    BuscadorInteligente
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
 })
 export class AppComponent {
-
+  
   page: PageView = 'vendedor';
-  previousPage: PageView = 'catalog';
+  previousPage: PageView = 'inicio';
 
   selectedModel: ModelItem = MODELS[0];
 
@@ -46,6 +47,7 @@ export class AppComponent {
   authView: AuthView = 'login';
    currentUser: SessionUser | null = this.getSavedUser();
    requestMode: RequestMode = 'personalizar';
+  isStandaloneRequest = false;
 
   showCatalog(): void {
     this.page = 'catalog';
@@ -62,25 +64,69 @@ showNosotros(): void {
   this.accessNotice = '';
 }
 
-  showDetails(model: ModelItem): void {
-    this.selectedModel = model;
-    this.page = 'detail';
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+showDetails(model: ModelItem): void {
+
+  this.isStandaloneRequest = false;
+
+  this.selectedModel = model;
+  this.page = 'detail';
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+
+}
+
+
+
+requestAccess(action: RequestMode): void {
+
+  this.isStandaloneRequest = false;
+
+  if (this.currentUser) {
+    this.openRequest(action);
+    return;
   }
 
-  requestAccess(action: RequestMode): void {
-    if (this.currentUser) {
-      this.openRequest(action);
-      return;
-    }
+  this.previousPage = this.page === 'auth'
+    ? this.previousPage
+    : this.page;
 
-    this.previousPage = this.page === 'auth' ? this.previousPage : this.page;
-    this.accessNotice = action === 'comprar'
-      ? 'Para comprar una maqueta debes iniciar sesion o registrarte.'
-      : 'Para personalizar tu maqueta debes iniciar sesion o registrarte.';
+  this.accessNotice = action === 'comprar'
+    ? 'Para comprar una maqueta debes iniciar sesion o registrarte.'
+    : 'Para personalizar tu maqueta debes iniciar sesion o registrarte.';
+
+  this.authView = 'login';
+  this.page = 'auth';
+}
+openStandaloneRequest(): void {
+
+  this.isStandaloneRequest = true;
+
+  if (!this.currentUser) {
+
+    this.previousPage = this.page;
+
+    this.accessNotice =
+      'Para personalizar tu maqueta debes iniciar sesion o registrarte.';
+
     this.authView = 'login';
     this.page = 'auth';
+
+    return;
   }
+
+  this.requestMode = 'personalizar';
+
+  this.page = 'request';
+
+  window.scrollTo({
+    top: 0,
+    behavior: 'smooth'
+  });
+}
+
   showLogin(): void {
     this.previousPage = 'catalog';
     this.accessNotice = '';

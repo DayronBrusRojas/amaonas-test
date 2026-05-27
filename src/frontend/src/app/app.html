@@ -17,10 +17,15 @@
 <app-inicio
   *ngIf="page === 'inicio'"
   (registerClicked)="showRegister()"
-  (catalogClicked)="showCatalog()">
+  (catalogClicked)="showCatalog()"
+  (requestAccess)="openStandaloneRequest()"
+  (modelSelected)="showDetails($event)">
 </app-inicio>
 
-<app-nosotros *ngIf="page === 'nosotros'"></app-nosotros>
+
+
+<app-nosotros *ngIf="page === 'nosotros'"
+  (catalogClicked)="showCatalog()"></app-nosotros>
 
   <app-catalog
     *ngIf="page === 'catalog'"
@@ -49,6 +54,7 @@
     [user]="currentUser"
     (changedMode)="switchRequestMode($event)"
     (submitted)="handleRequestSubmitted($event)"
+    [standaloneRequest]="isStandaloneRequest"
   ></app-request-form>
 
   <app-my-requests
