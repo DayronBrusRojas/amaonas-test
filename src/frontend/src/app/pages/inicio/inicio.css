@@ -66,6 +66,19 @@ body{
   max-width:850px;
   margin-inline:auto;
 }
+.popular-title{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:16px;
+  font-weight:700;
+  color:#0f172a;
+}
+
+.popular-title .material-icons{
+  color:#00a982;
+  font-size:22px;
+}
 
 .tags{
   display:flex;

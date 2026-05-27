@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
+import { ViewChild } from '@angular/core';
 
 import { BuscadorInteligente } from '../shared/components/buscador-inteligente/buscador-inteligente';
 
@@ -22,4 +23,10 @@ export class Inicio {
 
   @Output() catalogClicked = new EventEmitter<void>();
 
+  @ViewChild(BuscadorInteligente)
+buscador!: BuscadorInteligente;
+
+buscarTag(tag: string): void {
+  this.buscador.setBusqueda(tag);
+}
 }
