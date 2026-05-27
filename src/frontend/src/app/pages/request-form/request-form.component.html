@@ -1,16 +1,30 @@
-<section class="request-page">
-  <div class="preview-column">
-    <figure class="model-preview">
-      <img [src]="model.imageUrl" [alt]="model.title">
-      <figcaption>{{ model.category }}</figcaption>
-    </figure>
-  </div>
+<section class="request-page"
+  [class.standalone-layout]="standaloneRequest">
+  <div
+  class="preview-column"
+  *ngIf="!standaloneRequest">
+
+  <figure class="model-preview">
+
+    <img
+      [src]="model.imageUrl"
+      [alt]="model.title">
+
+    <figcaption>
+      {{ model.category }}
+    </figcaption>
+
+  </figure>
+
+</div>
 
   <section class="form-column">
     <header class="request-header">
       <h1>
         <span aria-hidden="true">{{ isCustomization ? '&#128393;' : '&#128722;' }}</span>
-        {{ title }}
+        {{ standaloneRequest
+    ? 'Solicitar Maqueta Personalizada'
+    : title }}
       </h1>
       <button type="button" (click)="changedMode.emit(alternateMode)">Cambiar</button>
     </header>
@@ -20,7 +34,13 @@
         <span aria-hidden="true">{{ isCustomization ? '&#128393;' : '&#128722;' }}</span>
         {{ actionTitle }}
       </h2>
-      <p *ngIf="isCustomization">Cuentanos como quieres que sea tu maqueta personalizada</p>
+      <p *ngIf="isCustomization">
+
+  {{ standaloneRequest
+    ? 'Describe la maqueta que necesitas y nuestro equipo la diseñará especialmente para ti.'
+    : 'Cuentanos como quieres que sea tu maqueta personalizada' }}
+
+</p>
 
       <label for="fullName">Nombre Completo *</label>
       <input id="fullName" name="fullName" type="text" required [(ngModel)]="form.fullName">

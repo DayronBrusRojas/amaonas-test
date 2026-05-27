@@ -279,3 +279,52 @@
     flex-direction: column;
   }
 }
+/* ===== FORMULARIO SOLO (BUSCADOR) ===== */
+
+.standalone-layout {
+  display: flex !important;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px 70px;
+}
+.standalone-layout .preview-column{
+  display:none;
+}
+
+.standalone-layout .form-column {
+  width: 100%;
+  max-width: 850px;
+}
+
+.standalone-layout .request-header{
+  justify-content:center;
+  text-align:center;
+}
+
+.standalone-layout .request-card{
+  width:100%;
+}.standalone-layout{
+  display:grid !important;
+  grid-template-columns:1fr !important;
+  justify-content:center;
+  padding:40px 20px 70px;
+}
+
+.standalone-layout .preview-column{
+  display:none;
+}
+
+.standalone-layout .form-column{
+  width:100%;
+  max-width:850px;
+  margin:0 auto;
+}
+
+.standalone-layout .request-header{
+  justify-content:center;
+  text-align:center;
+}
+
+.standalone-layout .request-card{
+  width:100%;
+}
