@@ -1,0 +1,34 @@
+package com.amazonas.backend.modules.products.repository;
+
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+
+import com.amazonas.backend.modules.products.model.Product;
+
+@Repository
+public interface ProductRepository extends JpaRepository<Product, UUID> {
+
+    @Query("SELECT p FROM Product p WHERE " +
+           "(:categoriaId IS NULL OR p.categoria.id = :categoriaId) AND " +
+           "(:search IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', :search, '%')) " +
+           "OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', :search, '%')))")
+    Page<Product> searchProducts(
+            @Param("categoriaId") String categoriaId,
+            @Param("search") String search,
+            Pageable pageable
+    );
+
+    @Query("SELECT p FROM Product p WHERE p.categoria.id = :categoriaId AND p.id <> :productId")
+    List<Product> findRelatedProducts(
+            @Param("categoriaId") String categoriaId,
+            @Param("productId") UUID productId,
+            Pageable pageable
+    );
+}
