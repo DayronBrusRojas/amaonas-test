@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input, OnChanges, Output, EventEmitter } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 type AuthView = 'login' | 'register';
@@ -15,22 +15,23 @@ interface UserAccount {
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './auth.html',
-  styleUrl: './auth.css',
+  styleUrl: './auth.css'
 })
 export class Auth implements OnChanges {
 
   @Input() accessNotice = '';
   @Input() initialView: AuthView = 'login';
 
-  @Output() closed = new EventEmitter<void>(); // 👈 CLAVE
+  @Output() closed = new EventEmitter<void>();
+  @Output() authenticated = new EventEmitter<UserAccount>();
 
   view: AuthView = 'login';
-
   recoverySent = false;
   successMessage = '';
   errorMessage = '';
 
-  login = {
+  login: UserAccount = {
+    name: '',
     email: '',
     password: ''
   };
@@ -42,8 +43,11 @@ export class Auth implements OnChanges {
     confirmPassword: ''
   };
 
-  ngOnChanges(): void {
-    this.view = this.initialView;
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['initialView']) {
+      this.view = this.initialView;
+      this.clearMessages();
+    }
   }
 
   get isLogin(): boolean {
@@ -60,6 +64,15 @@ export class Auth implements OnChanges {
     this.clearMessages();
   }
 
+  closeModal(): void {
+    this.clearMessages();
+
+    this.login = { name: '', email: '', password: '' };
+    this.register = { name: '', email: '', password: '', confirmPassword: '' };
+
+    this.closed.emit();
+  }
+
   submitLogin(): void {
     this.clearMessages();
 
@@ -70,7 +83,8 @@ export class Auth implements OnChanges {
       return;
     }
 
-    this.successMessage = `Bienvenido, ${account.name}.`;
+    this.successMessage = `Bienvenido, ${account.name}. Ya puedes continuar con tu maqueta.`;
+    this.authenticated.emit(account);
   }
 
   submitRegister(): void {
@@ -103,7 +117,9 @@ export class Auth implements OnChanges {
     localStorage.setItem('maquetasAccounts', JSON.stringify(accounts));
 
     this.login.email = email;
+    this.login.password = '';
     this.view = 'login';
+
     this.successMessage = 'Cuenta creada. Ahora inicia sesión.';
   }
 
@@ -111,23 +127,12 @@ export class Auth implements OnChanges {
     this.clearMessages();
 
     if (!this.login.email.trim()) {
-      this.errorMessage = 'Escribe tu correo electrónico.';
+      this.errorMessage = 'Escribe tu correo electrónico para recuperar tu cuenta.';
       return;
     }
 
     this.recoverySent = true;
-    this.successMessage = 'Se envió el enlace de recuperación (simulado).';
-  }
-
-  closeModal(): void {
-    this.clearMessages();
-
-    this.login = { email: '', password: '' };
-    this.register = { name: '', email: '', password: '', confirmPassword: '' };
-
-    this.view = 'login';
-
-    this.closed.emit(); // 👈 IMPORTANTE
+    this.successMessage = 'Se envió un enlace de recuperación (simulado).';
   }
 
   private clearMessages(): void {
