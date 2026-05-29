@@ -21,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor 
 public class SecurityConfig {
 
-    
     private final JwtFilter jwtFilter;
 
     @Bean
@@ -35,7 +34,6 @@ public class SecurityConfig {
                 session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
             )
 
-          
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
@@ -43,7 +41,6 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
 
-           
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -69,16 +66,13 @@ public class SecurityConfig {
 
     @Bean
     PasswordEncoder passwordEncoder() {
-        // Encriptador oficial para las contraseñas con el algoritmo robusto BCrypt
         return new BCryptPasswordEncoder();
     }
 
     @Bean
-   
     AuthenticationManager authenticationManager(
             AuthenticationConfiguration config
     ) throws Exception {
-
         return config.getAuthenticationManager();
     }
 }
