@@ -87,10 +87,10 @@
           <div class="product-item" [class.editing]="editingId === product.id">
             <!-- Product Info Header -->
             <div class="product-info">
-              <img [src]="product.imageUrl" [alt]="product.title" class="product-image" />
+              <img [src]="displayImageUrl(product)" [alt]="product.titulo" (error)="handleImageError($event)" class="product-image" />
               <div class="product-details">
-                <h3 class="product-name">{{ product.title }}</h3>
-                <p class="product-category">{{ product.category }}</p>
+                <h3 class="product-name">{{ product.titulo }}</h3>
+                <p class="product-category">{{ product.categoriaNombre }}</p>
                 
                 <span class="badge" [ngClass]="status.class">
                   @if (product.stock === 0) {
@@ -133,7 +133,7 @@
                     />
                   </div>
                   <div class="button-group">
-                    <button (click)="handleSaveStock(product.id)" class="btn-save">
+                    <button (click)="handleSaveStock(product)" class="btn-save">
                       Guardar
                     </button>
                     <button (click)="handleCancelEdit()" class="btn-cancel">
