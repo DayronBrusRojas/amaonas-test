@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { API_BASE_URL } from '../config/api.config';
 import { Product, ProductRequest, PageResponse } from '../models/product.model';
 
 @Injectable({ providedIn: 'root' })
 export class MaquetaService {
 
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api';
+  private readonly API_URL = API_BASE_URL;
 
   getProducts(
     category?: string,

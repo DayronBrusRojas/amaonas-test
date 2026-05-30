@@ -2,13 +2,14 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
+import { API_BASE_URL } from '../config/api.config';
 import { BudgetRequest, BudgetResponse } from '../models/budget.model';
 
 @Injectable({ providedIn: 'root' })
 export class BudgetService {
 
   private readonly http = inject(HttpClient);
-  private readonly API_URL = 'http://localhost:8080/api';
+  private readonly API_URL = API_BASE_URL;
 
   obtenerPorSolicitud(solicitudId: string): Observable<BudgetResponse> {
     return this.http.get<BudgetResponse>(
