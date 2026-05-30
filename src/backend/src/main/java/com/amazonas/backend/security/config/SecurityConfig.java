@@ -12,6 +12,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import java.util.List;
+import org.springframework.http.HttpMethod;
 import com.amazonas.backend.security.jwt.JwtFilter;
 
 import lombok.RequiredArgsConstructor;
@@ -34,15 +35,11 @@ public class SecurityConfig {
             )
 
             .authorizeHttpRequests(auth -> auth
-                // Declaramos explícitamente todas las variantes de auth para no dejarle dudas a Spring
-                .requestMatchers(
-                    "/api/auth",
-                    "/api/auth/",
-                    "/api/auth/**",
-                    "/api/auth/vendor/login",
-                    "/api/auth/vendor/login/"
-                ).permitAll()
-                
+                .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
+                .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/purchase-requests/**").authenticated()
+                .requestMatchers("/api/budgets/**").authenticated()
                 .anyRequest().authenticated()
             )
 

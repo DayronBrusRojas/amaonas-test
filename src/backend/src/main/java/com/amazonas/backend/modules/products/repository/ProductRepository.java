@@ -15,10 +15,20 @@ import com.amazonas.backend.modules.products.model.Product;
 @Repository
 public interface ProductRepository extends JpaRepository<Product, UUID> {
 
-    @Query("SELECT p FROM Product p WHERE " +
-           "(:categoriaId IS NULL OR p.categoria.id = :categoriaId) AND " +
-           "(:search IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', :search, '%')) " +
-           "OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', :search, '%')))")
+    @Query(value = "SELECT DISTINCT p FROM Product p " +
+           "LEFT JOIN p.materiales pm " +
+           "LEFT JOIN pm.material m " +
+           "WHERE (:categoriaId IS NULL OR p.categoria.id = :categoriaId) AND " +
+           "(CAST(:search AS string) IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
+           "OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
+           "OR LOWER(m.nombre) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))",
+           countQuery = "SELECT COUNT(DISTINCT p) FROM Product p " +
+           "LEFT JOIN p.materiales pm " +
+           "LEFT JOIN pm.material m " +
+           "WHERE (:categoriaId IS NULL OR p.categoria.id = :categoriaId) AND " +
+           "(CAST(:search AS string) IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
+           "OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
+           "OR LOWER(m.nombre) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))")
     Page<Product> searchProducts(
             @Param("categoriaId") String categoriaId,
             @Param("search") String search,

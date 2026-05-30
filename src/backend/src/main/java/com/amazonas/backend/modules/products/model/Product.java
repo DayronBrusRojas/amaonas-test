@@ -43,9 +43,8 @@ public class Product {
     @Column(name = "image_url", length = 500)
     private String imageUrl;
 
-    @org.hibernate.annotations.JdbcTypeCode(org.hibernate.type.SqlTypes.ARRAY)
-    @Column(name = "materiales", columnDefinition = "text[]")
-    private List<String> materiales;
+    @jakarta.persistence.OneToMany(mappedBy = "product", cascade = jakarta.persistence.CascadeType.ALL, orphanRemoval = true)
+    private List<ProductMaterial> materiales = new java.util.ArrayList<>();
 
     @Column(name = "grado_escolar", length = 50)
     private String gradoEscolar;
@@ -140,11 +139,11 @@ public class Product {
         this.imageUrl = imageUrl;
     }
 
-    public List<String> getMateriales() {
+    public List<ProductMaterial> getMateriales() {
         return materiales;
     }
 
-    public void setMateriales(List<String> materiales) {
+    public void setMateriales(List<ProductMaterial> materiales) {
         this.materiales = materiales;
     }
 
