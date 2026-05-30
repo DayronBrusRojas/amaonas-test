@@ -38,6 +38,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/products", "/api/products/**").permitAll()
                 .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+                .requestMatchers("/api/purchase-requests/**").authenticated()
+                .requestMatchers("/api/budgets/**").authenticated()
                 .anyRequest().authenticated()
             )
 
