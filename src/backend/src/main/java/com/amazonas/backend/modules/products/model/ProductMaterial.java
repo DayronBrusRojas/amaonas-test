@@ -48,6 +48,14 @@ public class ProductMaterial {
 
     public ProductMaterial() {}
 
+    public ProductMaterial(Product product, Material material, BigDecimal cantidadSugerida, Boolean esOpcional) {
+        this.product = product;
+        this.material = material;
+        this.cantidadSugerida = cantidadSugerida;
+        this.esOpcional = esOpcional;
+        this.notas = null;
+    }
+
     public ProductMaterial(Product product, Material material, BigDecimal cantidadSugerida, Boolean esOpcional, String notas) {
         this.product = product;
         this.material = material;
