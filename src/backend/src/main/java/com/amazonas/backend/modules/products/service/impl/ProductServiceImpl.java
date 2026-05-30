@@ -1,5 +1,6 @@
 package com.amazonas.backend.modules.products.service.impl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -15,8 +16,11 @@ import com.amazonas.backend.modules.categories.repository.CategoryRepository;
 import com.amazonas.backend.modules.products.dto.ProductRequest;
 import com.amazonas.backend.modules.products.dto.ProductResponse;
 import com.amazonas.backend.modules.products.model.Product;
+import com.amazonas.backend.modules.products.model.ProductMaterial;
 import com.amazonas.backend.modules.products.repository.ProductRepository;
 import com.amazonas.backend.modules.products.service.ProductService;
+import com.amazonas.backend.modules.materials.model.Material;
+import com.amazonas.backend.modules.materials.repository.MaterialRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,6 +30,7 @@ public class ProductServiceImpl implements ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
+    private final MaterialRepository materialRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -64,11 +69,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public ProductResponse createProduct(ProductRequest request) {
-        Category category = categoryRepository.findById(request.getCategoriaId())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada: " + request.getCategoriaId()));
-
         Product product = new Product();
-        updateProductFields(product, request, category);
+        updateProductFields(product, request);
 
         Product savedProduct = productRepository.save(product);
         return mapToResponseDetail(savedProduct);
@@ -80,10 +82,7 @@ public class ProductServiceImpl implements ProductService {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-        Category category = categoryRepository.findById(request.getCategoriaId())
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada: " + request.getCategoriaId()));
-
-        updateProductFields(product, request, category);
+        updateProductFields(product, request);
 
         Product savedProduct = productRepository.save(product);
         return mapToResponseDetail(savedProduct);
@@ -102,17 +101,135 @@ public class ProductServiceImpl implements ProductService {
     // PRIVATE HELPER METHODS
     // ===================================
 
-    private void updateProductFields(Product product, ProductRequest request, Category category) {
+    private void updateProductFields(Product product, ProductRequest request) {
         product.setTitulo(request.getTitulo());
         product.setDescripcion(request.getDescripcion());
         product.setDescripcionDetallada(request.getDescripcionDetallada());
+        
+        // Categoria auto-creacion/resolucion
+        Category category = resolveCategory(request.getCategoriaId());
         product.setCategoria(category);
+        
         product.setImageUrl(request.getImageUrl());
-        product.setMateriales(request.getMateriales());
-        product.setGradoEscolar(request.getGradoEscolar());
-        product.setOcasion(request.getOcasion());
+        
+        // Grado escolar normalizacion
+        if (request.getGradoEscolar() != null) {
+            product.setGradoEscolar(request.getGradoEscolar().trim().toUpperCase());
+        } else {
+            product.setGradoEscolar(null);
+        }
+        
+        // Ocasion normalizacion
+        if (request.getOcasion() != null) {
+            List<String> normalizedOcasion = request.getOcasion().stream()
+                    .filter(o -> o != null && !o.trim().isEmpty())
+                    .map(o -> toTitleCase(o.trim()))
+                    .collect(Collectors.toList());
+            product.setOcasion(normalizedOcasion);
+        } else {
+            product.setOcasion(null);
+        }
+        
         product.setMaterialesReciclables(request.getMaterialesReciclables() != null && request.getMaterialesReciclables());
         product.setStock(request.getStock());
+        
+        // ProductMaterial update
+        if (product.getMateriales() == null) {
+            product.setMateriales(new ArrayList<>());
+        } else {
+            product.getMateriales().clear();
+        }
+        
+        if (request.getMateriales() != null) {
+            for (ProductRequest.ProductMaterialInput input : request.getMateriales()) {
+                if (input.getNombre() == null || input.getNombre().trim().isEmpty()) {
+                    continue;
+                }
+                Material material = materialRepository.findByNombreIgnoreCase(input.getNombre().trim())
+                        .orElseThrow(() -> new RuntimeException("Material no encontrado en inventario: " + input.getNombre()));
+                
+                ProductMaterial pm = new ProductMaterial(
+                        product,
+                        material,
+                        input.getCantidadSugerida() != null ? input.getCantidadSugerida() : java.math.BigDecimal.ONE,
+                        input.getEsOpcional() != null ? input.getEsOpcional() : false,
+                        input.getNotas()
+                );
+                product.getMateriales().add(pm);
+            }
+        }
+    }
+
+    private Category resolveCategory(String categoryInput) {
+        if (categoryInput == null || categoryInput.trim().isEmpty()) {
+            throw new RuntimeException("La categoría es obligatoria");
+        }
+        
+        String input = categoryInput.trim();
+        
+        // 1. Intentar buscar por ID/Slug exacto
+        Category category = categoryRepository.findById(input).orElse(null);
+        if (category != null) {
+            return category;
+        }
+        
+        // 2. Intentar buscar por nombre exacto (case-insensitive)
+        category = categoryRepository.findByNombreIgnoreCase(input).orElse(null);
+        if (category != null) {
+            return category;
+        }
+        
+        // 3. Si no existe, determinar ID y Nombre para auto-creación
+        String nombre;
+        String id;
+        
+        if (input.contains("-") && !input.contains(" ")) {
+            // Parece un slug: "manualidades-creativas"
+            nombre = toTitleCase(input.replace("-", " "));
+            id = input;
+        } else {
+            // Parece un nombre normal: "Manualidades Creativas"
+            nombre = toTitleCase(input);
+            id = slugify(input);
+        }
+        
+        // Validar de nuevo por las dudas tras formatear
+        category = categoryRepository.findById(id).orElse(null);
+        if (category != null) {
+            return category;
+        }
+        
+        category = categoryRepository.findByNombreIgnoreCase(nombre).orElse(null);
+        if (category != null) {
+            return category;
+        }
+        
+        // Crear nueva categoría
+        Category newCategory = new Category();
+        newCategory.setId(id);
+        newCategory.setNombre(nombre);
+        newCategory.setDescripcion("Categoría auto-creada para " + nombre);
+        newCategory.setOrden(0);
+        
+        return categoryRepository.save(newCategory);
+    }
+
+    private String slugify(String input) {
+        if (input == null) return null;
+        String normalized = java.text.Normalizer.normalize(input, java.text.Normalizer.Form.NFD);
+        return normalized.replaceAll("\\p{InCombiningDiacriticalMarks}+", "")
+                .toLowerCase()
+                .replaceAll("[^a-z0-9\\s-]", "")
+                .replaceAll("\\s+", "-")
+                .replaceAll("-+", "-")
+                .replaceAll("^-|-$", "");
+    }
+
+    private String toTitleCase(String input) {
+        if (input == null || input.isBlank()) return input;
+        return java.util.Arrays.stream(input.trim().split("\\s+"))
+                .map(word -> word.isEmpty() ? "" : Character.toUpperCase(word.charAt(0)) + word.substring(1).toLowerCase())
+                .collect(Collectors.joining(" "));
     }
 
     private ProductResponse mapToResponseSummary(Product product) {
@@ -123,12 +240,21 @@ public class ProductServiceImpl implements ProductService {
         response.setImageUrl(product.getImageUrl());
         response.setGradoEscolar(product.getGradoEscolar());
         response.setMaterialesReciclables(product.getMaterialesReciclables());
-        response.setMateriales(product.getMateriales());
         response.setOcasion(product.getOcasion());
         if (product.getCategoria() != null) {
             response.setCategoriaId(product.getCategoria().getId());
             response.setCategoriaNombre(product.getCategoria().getNombre());
         }
+        
+        if (product.getMateriales() != null) {
+            List<String> materialNames = product.getMateriales().stream()
+                    .map(pm -> pm.getMaterial().getNombre())
+                    .collect(Collectors.toList());
+            response.setMateriales(materialNames);
+        } else {
+            response.setMateriales(new ArrayList<>());
+        }
+        
         return response;
     }
 
@@ -136,6 +262,30 @@ public class ProductServiceImpl implements ProductService {
         ProductResponse response = mapToResponseSummary(product);
         response.setDescripcionDetallada(product.getDescripcionDetallada());
         response.setStock(product.getStock());
+        
+        if (product.getMateriales() != null) {
+            List<ProductResponse.ProductMaterialDetail> detailList = product.getMateriales().stream()
+                    .map(pm -> {
+                        ProductResponse.ProductMaterialDetail detail = new ProductResponse.ProductMaterialDetail();
+                        Material m = pm.getMaterial();
+                        detail.setMaterialId(m.getId());
+                        detail.setNombre(m.getNombre());
+                        detail.setUnidad(m.getUnidad());
+                        detail.setCostoVenta(m.getCostoVenta());
+                        detail.setCantidadSugerida(pm.getCantidadSugerida());
+                        detail.setEsOpcional(pm.getEsOpcional());
+                        detail.setNotas(pm.getNotas());
+                        if (m.getCategoria() != null) {
+                            detail.setCategoriaMaterial(m.getCategoria().getNombre());
+                        }
+                        return detail;
+                    })
+                    .collect(Collectors.toList());
+            response.setMaterialesDetalle(detailList);
+        } else {
+            response.setMaterialesDetalle(new ArrayList<>());
+        }
+        
         return response;
     }
 }
