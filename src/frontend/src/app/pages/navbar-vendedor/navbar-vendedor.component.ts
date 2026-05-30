@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { DashboardComponent } from './sections/dashboard/dashboard.component';
 import { MaquetaComponent } from './sections/maqueta/maqueta.component';
+import { GestionStockComponent } from './sections/gestion-stock/gestion-stock.component';
 
 export type VendedorTab =
   | 'dashboard'
@@ -21,10 +22,11 @@ export interface NavItem {
 @Component({
   selector: 'app-navbar-vendedor',
   standalone: true,
-  imports: [CommonModule, DashboardComponent, MaquetaComponent],
+  imports: [CommonModule, DashboardComponent, MaquetaComponent, GestionStockComponent],
   templateUrl: './navbar-vendedor.component.html',
   styleUrl: './navbar-vendedor.component.css',
 })
+
 export class NavbarVendedorComponent {
 
   @Output() salir = new EventEmitter<void>();
