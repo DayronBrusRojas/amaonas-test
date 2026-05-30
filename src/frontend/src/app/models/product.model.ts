@@ -20,13 +20,20 @@ export interface RelatedProduct {
   imageUrl: string;
 }
 
+export interface ProductMaterialInput {
+  nombre: string;
+  cantidadSugerida?: number;
+  esOpcional?: boolean;
+  notas?: string;
+}
+
 export interface ProductRequest {
   titulo: string;
   descripcion?: string;
   descripcionDetallada?: string;
   categoriaId: string;
   imageUrl?: string;
-  materiales?: string[];
+  materiales?: ProductMaterialInput[];
   gradoEscolar?: string;
   ocasion?: string[];
   materialesReciclables?: boolean;

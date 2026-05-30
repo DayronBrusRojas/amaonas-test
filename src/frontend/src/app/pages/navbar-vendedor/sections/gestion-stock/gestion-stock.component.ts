@@ -1,15 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { MODELS, ModelItem } from '../../../data/model';
-
-interface ProductWithStock {
-  id: string;
-  title: string;
-  category: string;
-  stock: number;
-  imageUrl: string;
-}
+import { MaquetaService } from '../../../../services/maqueta.service';
+import { Product } from '../../../../models/product.model';
 
 @Component({
   selector: 'app-gestion-stock',
@@ -19,44 +12,74 @@ interface ProductWithStock {
   styleUrl: './gestion-stock.component.css'
 })
 export class GestionStockComponent implements OnInit {
-  productStock: ProductWithStock[] = [];
+  private readonly maquetaService = inject(MaquetaService);
+
+  productStock: Product[] = [];
   searchTerm: string = '';
   editingId: string | null = null;
   tempStock: number = 0;
 
   ngOnInit(): void {
-    const stored = localStorage.getItem('products');
-    if (stored) {
-      this.productStock = JSON.parse(stored);
-    } else {
-      const initialStock = MODELS.map((p: ModelItem) => ({
-        id: p.id.toString(),
-        title: p.title,
-        category: p.category,
-        stock: Math.floor(Math.random() * 20) + 1,
-        imageUrl: p.imageUrl
-      }));
-      this.productStock = initialStock;
-      localStorage.setItem('products', JSON.stringify(initialStock));
-    }
+    this.loadProducts();
   }
 
-  handleEditStock(product: ProductWithStock): void {
+  loadProducts(): void {
+    this.maquetaService.getProducts('', '', 0, 100).subscribe({
+      next: (page) => {
+        this.productStock = page.content;
+      },
+      error: (err) => {
+        console.error('Error al cargar productos desde el backend:', err);
+      }
+    });
+  }
+
+  handleEditStock(product: Product): void {
     this.editingId = product.id;
     this.tempStock = product.stock;
   }
 
-  handleSaveStock(productId: string): void {
-    this.productStock = this.productStock.map(p =>
-      p.id === productId ? { ...p, stock: this.tempStock } : p
-    );
-    localStorage.setItem('products', JSON.stringify(this.productStock));
-    this.editingId = null;
+  handleSaveStock(product: Product): void {
+    const request = {
+      titulo: product.titulo,
+      descripcion: product.descripcion,
+      descripcionDetallada: product.descripcionDetallada,
+      categoriaId: product.categoriaId,
+      imageUrl: product.imageUrl,
+      materiales: product.materiales ? product.materiales.map(nombre => ({ nombre })) : [],
+      gradoEscolar: product.gradoEscolar,
+      ocasion: product.ocasion,
+      materialesReciclables: product.materialesReciclables,
+      stock: this.tempStock
+    };
+
+    this.maquetaService.updateProduct(product.id, request).subscribe({
+      next: (updatedProduct) => {
+        this.productStock = this.productStock.map(p =>
+          p.id === product.id ? updatedProduct : p
+        );
+        this.editingId = null;
+      },
+      error: (err) => {
+        console.error('Error al actualizar el stock en el backend:', err);
+      }
+    });
   }
 
   handleCancelEdit(): void {
     this.editingId = null;
     this.tempStock = 0;
+  }
+
+  displayImageUrl(product: Product): string {
+    if (product.imageUrl && product.imageUrl.includes('via.placeholder.com')) {
+      return "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><circle cx='8.5' cy='8.5' r='1.5'></circle><polyline points='21 15 16 10 5 21'></polyline></svg>";
+    }
+    return product.imageUrl;
+  }
+
+  handleImageError(event: Event): void {
+    (event.target as HTMLImageElement).src = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'><rect x='3' y='3' width='18' height='18' rx='2' ry='2'></rect><circle cx='8.5' cy='8.5' r='1.5'></circle><polyline points='21 15 16 10 5 21'></polyline></svg>";
   }
 
   getStockStatus(stock: number) {
@@ -69,10 +92,10 @@ export class GestionStockComponent implements OnInit {
     return { label: 'Disponible', class: 'badge-ok', statusClass: 'status-ok' };
   }
 
-  get filteredProducts(): ProductWithStock[] {
+  get filteredProducts(): Product[] {
     return this.productStock.filter(p =>
-      p.title.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      p.category.toLowerCase().includes(this.searchTerm.toLowerCase())
+      p.titulo.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      p.categoriaNombre.toLowerCase().includes(this.searchTerm.toLowerCase())
     );
   }
 
