@@ -23,6 +23,9 @@ export interface SavedRequest {
   selectedMaterials?: string[];
   extraMaterials?: string[];
   otherMaterials?: string;
+  explanationType?: string;
+  explanationModel?: string;
+  explanationPeople?: number;
 }
 
 @Component({
@@ -33,10 +36,14 @@ export interface SavedRequest {
   styleUrl: './request-form.component.css'
 })
 export class RequestFormComponent {
+
   @Input({ required: true }) model!: ModelItem;
   @Input({ required: true }) mode!: RequestMode;
   @Input() user: SessionUser | null = null;
+
+  // NUEVO INPUT
   @Input() standaloneRequest = false;
+
   @Output() changedMode = new EventEmitter<RequestMode>();
   @Output() submitted = new EventEmitter<SavedRequest>();
 
@@ -91,23 +98,42 @@ export class RequestFormComponent {
     description: '',
     message: '',
     otherMaterials: '',
-    explanation: false
+    explanation: false,
+    explanationType: 'presencial',
+    explanationModel: '',
+    explanationPeople: 2
   };
+
+  explanationTypes = [
+    { value: 'video', label: 'Video pregrabado', icon: '&#128249;' },
+    { value: 'presencial', label: 'Explicacion presencial', icon: '&#128101;' },
+    { value: 'virtual', label: 'Explicacion virtual', icon: '&#128249; &#128101;' }
+  ];
+
+  explanationModels = ['Individual', 'Grupal', 'Salon'];
 
   selectedMaterials: string[] = [];
   selectedExtras: string[] = [];
   successMessage = '';
 
-  
-
   ngOnChanges(): void {
+
     this.form.fullName = this.user?.name || this.form.fullName || 'Juan';
     this.form.email = this.user?.email || this.form.email || 'juan@gmail.com';
     this.form.phone = this.form.phone || '+51 999 999 999';
-    this.selectedMaterials = this.model.materials.slice(0, 4);
 
-    while (this.selectedMaterials.length < 4) {
-      this.selectedMaterials.push(this.materialOptions[this.selectedMaterials.length]);
+    // Evita error si model aún no existe
+    if (this.model?.materials) {
+      this.selectedMaterials = this.model.materials.slice(0, 4);
+
+      while (
+        this.selectedMaterials.length < 4 &&
+        this.selectedMaterials.length < this.materialOptions.length
+      ) {
+        this.selectedMaterials.push(
+          this.materialOptions[this.selectedMaterials.length]
+        );
+      }
     }
   }
 
@@ -116,19 +142,44 @@ export class RequestFormComponent {
   }
 
   get title(): string {
-    return this.isCustomization ? 'Personalizar Maqueta' : 'Comprar Maqueta Ya Hecha';
+    return this.isCustomization
+      ? 'Personalizar Maqueta'
+      : 'Comprar Maqueta Ya Hecha';
   }
 
   get actionTitle(): string {
-    return this.isCustomization ? 'Solicitud de Personalizacion' : 'Solicitar Compra';
+    return this.isCustomization
+      ? 'Solicitud de Personalizacion'
+      : 'Solicitar Compra';
   }
 
   get submitLabel(): string {
-    return this.isCustomization ? 'Enviar Solicitud de Personalizacion' : 'Enviar Solicitud';
+    return this.isCustomization
+      ? 'Enviar Solicitud de Personalizacion'
+      : 'Enviar Solicitud';
   }
 
   get alternateMode(): RequestMode {
     return this.isCustomization ? 'comprar' : 'personalizar';
+  }
+
+  get requiresExplanationPeople(): boolean {
+    return (
+      this.form.explanationModel === 'Grupal' ||
+      this.form.explanationModel === 'Salon'
+    );
+  }
+
+  get explanationPeopleMinimum(): number {
+    return this.form.explanationModel === 'Salon' ? 10 : 2;
+  }
+
+  updateExplanationPeopleMinimum(): void {
+    if (!this.requiresExplanationPeople) {
+      return;
+    }
+
+    this.form.explanationPeople = this.explanationPeopleMinimum;
   }
 
   toggleExtra(material: string): void {
@@ -142,28 +193,50 @@ export class RequestFormComponent {
   }
 
   submitRequest(): void {
+
     const request: SavedRequest = {
       id: Date.now(),
       mode: this.mode,
-      modelTitle: this.model.title,
+      modelTitle: this.model?.title || 'Solicitud personalizada',
       fullName: this.form.fullName,
       email: this.form.email,
       phone: this.form.phone,
-      detail: this.isCustomization ? this.form.description : this.form.message,
+      detail: this.isCustomization
+        ? this.form.description
+        : this.form.message,
       explanation: this.form.explanation,
       date: new Date().toISOString(),
-      selectedMaterials: this.isCustomization ? [...this.selectedMaterials] : undefined,
-      extraMaterials: this.isCustomization ? [...this.selectedExtras] : undefined,
-      otherMaterials: this.isCustomization ? this.form.otherMaterials : undefined
+      selectedMaterials: this.isCustomization
+        ? [...this.selectedMaterials]
+        : undefined,
+      extraMaterials: this.isCustomization
+        ? [...this.selectedExtras]
+        : undefined,
+      otherMaterials: this.isCustomization
+        ? this.form.otherMaterials
+        : undefined,
+      explanationType: this.form.explanation
+        ? this.form.explanationType
+        : undefined,
+      explanationModel: this.form.explanation
+        ? this.form.explanationModel
+        : undefined,
+      explanationPeople:
+        this.form.explanation && this.requiresExplanationPeople
+          ? this.form.explanationPeople
+          : undefined
     };
 
     const saved = this.getSavedRequests();
-    localStorage.setItem('maquetasRequests', JSON.stringify([request, ...saved]));
+
+    localStorage.setItem(
+      'maquetasRequests',
+      JSON.stringify([request, ...saved])
+    );
+
     this.successMessage = 'Solicitud enviada correctamente.';
     this.submitted.emit(request);
   }
-
-  
 
   private getSavedRequests(): SavedRequest[] {
     const saved = localStorage.getItem('maquetasRequests');
