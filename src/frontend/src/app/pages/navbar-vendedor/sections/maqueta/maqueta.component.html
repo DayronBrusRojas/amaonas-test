@@ -95,6 +95,8 @@
       <!-- TAB: CREAR NUEVA MAQUETA -->
       @if (formTab === 'nueva') {
         <div class="config-form-card">
+
+          <!-- Row 1: Nombre + Categoría -->
           <div class="form-row">
             <div class="form-field">
               <label class="field-label">Nombre de la Maqueta <span class="required">*</span></label>
@@ -104,23 +106,68 @@
                 placeholder="Ej: Casa Solar"
                 [(ngModel)]="form.nombre">
             </div>
-            <div class="form-field">
-              <label class="field-label">Categoría <span class="required">*</span></label>
-              <select class="field-select" [(ngModel)]="form.categoria">
-                @for (cat of categorias; track cat) {
-                  <option [value]="cat">{{ cat }}</option>
-                }
-              </select>
-            </div>
+            <app-combobox-input
+              label="Categoría"
+              [required]="true"
+              placeholder="Buscar o crear categoría..."
+              [initialOptions]="categorias"
+              [value]="form.categoria"
+              (valueChange)="form.categoria = $event">
+            </app-combobox-input>
           </div>
+
+          <!-- Row 2: Ocasión + Grado Escolar -->
+          <div class="form-row">
+            <app-combobox-input
+              label="Ocasión"
+              placeholder="Buscar o crear ocasión..."
+              [initialOptions]="ocasionesOptions"
+              [value]="form.ocasion"
+              (valueChange)="form.ocasion = $event">
+            </app-combobox-input>
+            <app-combobox-input
+              label="Grado Escolar"
+              placeholder="Buscar o crear grado..."
+              [initialOptions]="gradosOptions"
+              [value]="form.gradoEscolar"
+              (valueChange)="form.gradoEscolar = $event">
+            </app-combobox-input>
+          </div>
+
+          <!-- Row 3: Imagen -->
           <div class="form-field">
-            <label class="field-label">URL de Imagen <span class="required">*</span></label>
+            <label class="field-label">Imagen de la Maqueta <span class="required">*</span></label>
             <input
-              class="field-input"
-              type="text"
-              placeholder="https://ejemplo.com/imagen.jpg"
-              [(ngModel)]="form.urlImagen">
+              #fileInput
+              type="file"
+              accept="image/*"
+              class="file-hidden"
+              (change)="onImageSelected($event)">
+            @if (!imagenPreviewUrl) {
+              <div class="img-upload-area" (click)="fileInput.click()">
+                <svg viewBox="0 0 24 24" class="img-upload-icon" aria-hidden="true">
+                  <polyline points="16 16 12 12 8 16"/>
+                  <line x1="12" y1="12" x2="12" y2="21"/>
+                  <path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/>
+                </svg>
+                <p class="img-upload-text">Haz clic para subir imagen</p>
+                <p class="img-upload-hint">PNG, JPG, WEBP (máx. 5 MB)</p>
+              </div>
+            } @else {
+              <div class="img-preview-wrap">
+                <img class="img-preview-thumb" [src]="imagenPreviewUrl" alt="Vista previa">
+                <div class="img-preview-info">
+                  <p class="img-preview-name">{{ imagenFile?.name }}</p>
+                  <div class="img-preview-actions">
+                    <button class="btn-cambiar-img" type="button" (click)="fileInput.click()">Cambiar</button>
+                    <button class="btn-eliminar-img" type="button" (click)="removeImage()">Eliminar</button>
+                  </div>
+                </div>
+              </div>
+            }
           </div>
+
+          <!-- Row 4: Descripción -->
           <div class="form-field">
             <label class="field-label">Descripción (opcional)</label>
             <textarea
@@ -130,6 +177,7 @@
               [(ngModel)]="form.descripcion">
             </textarea>
           </div>
+
         </div>
       }
 

@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ComboboxInputComponent } from './combobox-input/combobox-input.component';
 
 export type FormTab = 'catalogo' | 'nueva';
 
@@ -32,7 +33,8 @@ export interface ProductoSinSolicitud {
 export interface NuevaMaquetaForm {
   nombre: string;
   categoria: string;
-  urlImagen: string;
+  ocasion: string;
+  gradoEscolar: string;
   descripcion: string;
   maquetaSeleccionada: string;
 }
@@ -40,7 +42,7 @@ export interface NuevaMaquetaForm {
 @Component({
   selector: 'app-maqueta',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, ComboboxInputComponent],
   templateUrl: './maqueta.component.html',
   styleUrl: './maqueta.component.css',
 })
@@ -108,6 +110,16 @@ export class MaquetaComponent {
 
   categorias: string[] = ['Educativa', 'Arquitectura', 'Ciencia', 'Tecnología'];
 
+  ocasionesOptions: string[] = [
+    'Feria Escolar', 'Exposición', 'Concurso', 'Proyecto de Clase',
+    'Evento Cultural', 'Día Científico', 'Presentación Final',
+  ];
+
+  gradosOptions: string[] = [
+    'Inicial / Kinder', 'Primaria', 'Secundaria',
+    'Bachillerato', 'Universidad', 'Posgrado',
+  ];
+
   categoriaColorMap: Record<string, string> = {
     'Ciencia':       '#64748b',
     'Arquitectura':  '#64748b',
@@ -138,10 +150,14 @@ export class MaquetaComponent {
   showForm = false;
   formTab: FormTab = 'catalogo';
 
+  imagenFile: File | null = null;
+  imagenPreviewUrl: string | null = null;
+
   form: NuevaMaquetaForm = {
     nombre: '',
-    categoria: 'Educativa',
-    urlImagen: '',
+    categoria: '',
+    ocasion: '',
+    gradoEscolar: '',
     descripcion: '',
     maquetaSeleccionada: '',
   };
@@ -155,12 +171,32 @@ export class MaquetaComponent {
     this.formTab = 'catalogo';
   }
 
+  onImageSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files[0]) {
+      this.imagenFile = input.files[0];
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        this.imagenPreviewUrl = e.target?.result as string;
+      };
+      reader.readAsDataURL(input.files[0]);
+    }
+  }
+
+  removeImage(): void {
+    this.imagenFile = null;
+    this.imagenPreviewUrl = null;
+  }
+
   cancelar(): void {
     this.showForm = false;
+    this.imagenFile = null;
+    this.imagenPreviewUrl = null;
     this.form = {
       nombre: '',
-      categoria: 'Educativa',
-      urlImagen: '',
+      categoria: '',
+      ocasion: '',
+      gradoEscolar: '',
       descripcion: '',
       maquetaSeleccionada: '',
     };
