@@ -415,6 +415,125 @@
 }
 
 /* ═══════════════════════════════════════════════════════════════
+   IMAGE UPLOAD
+═══════════════════════════════════════════════════════════════ */
+.file-hidden {
+  display: none;
+}
+
+.img-upload-area {
+  border: 2px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 28px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  background: #fafafa;
+  transition: border-color 0.2s, background 0.2s;
+  user-select: none;
+}
+
+.img-upload-area:hover {
+  border-color: #3b82f6;
+  background: #f0f7ff;
+}
+
+.img-upload-icon {
+  width: 36px;
+  height: 36px;
+  stroke: #94a3b8;
+  fill: none;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.img-upload-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #475569;
+  margin: 0;
+}
+
+.img-upload-hint {
+  font-size: 12px;
+  color: #94a3b8;
+  margin: 0;
+}
+
+/* ── preview ── */
+.img-preview-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.img-preview-thumb {
+  width: 80px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.img-preview-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.img-preview-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #1a2a3a;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.img-preview-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-cambiar-img {
+  font-size: 12px;
+  font-weight: 600;
+  color: #3b82f6;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-cambiar-img:hover {
+  text-decoration: underline;
+}
+
+.btn-eliminar-img {
+  font-size: 12px;
+  font-weight: 600;
+  color: #ef4444;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
+
+.btn-eliminar-img:hover {
+  text-decoration: underline;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    ANÁLISIS DE PRODUCTOS
 ═══════════════════════════════════════════════════════════════ */
 .analisis-section {
