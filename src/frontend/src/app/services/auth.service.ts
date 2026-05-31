@@ -26,11 +26,15 @@ export class AuthService {
   }
 
   register(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/register`, request);
+    return this.http.post<AuthResponse>(`${this.API_URL}/register`, request).pipe(
+      tap(response => this.saveSession(response))
+    );
   }
 
   registerVendor(request: RegisterRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${this.API_URL}/vendor/register`, request);
+    return this.http.post<AuthResponse>(`${this.API_URL}/vendor/register`, request).pipe(
+      tap(response => this.saveSession(response))
+    );
   }
 
   login(request: LoginRequest): Observable<AuthResponse> {
@@ -45,6 +49,33 @@ export class AuthService {
     );
   }
 
+  loginAuto(request: LoginRequest): Observable<AuthResponse> {
+    return new Observable<AuthResponse>(subscriber => {
+      this.login(request).subscribe({
+        next: (response) => {
+          subscriber.next(response);
+          subscriber.complete();
+        },
+        error: (err) => {
+          const errMsg = err?.error?.message || err?.error || '';
+          if (typeof errMsg === 'string' && (errMsg.includes('Usuario no encontrado') || errMsg.includes('no encontrado'))) {
+            this.vendorLogin(request).subscribe({
+              next: (response) => {
+                subscriber.next(response);
+                subscriber.complete();
+              },
+              error: (vendorErr) => {
+                subscriber.error(vendorErr);
+              }
+            });
+          } else {
+            subscriber.error(err);
+          }
+        }
+      });
+    });
+  }
+
   getVendorProfile(): Observable<CurrentUserResponse> {
     return this.http.get<CurrentUserResponse>(`${this.API_URL}/vendor/me`).pipe(
       tap(user => this.currentUserSubject.next(user))
@@ -52,27 +83,46 @@ export class AuthService {
   }
 
   saveSession(auth: AuthResponse): void {
+    let role = auth.role;
+    if (!role && auth.token) {
+      role = this.getRoleFromToken(auth.token) || '';
+    }
+
     localStorage.setItem('auth_token', auth.token);
     localStorage.setItem('auth_email', auth.email);
-    localStorage.setItem('auth_role', auth.role);
+    localStorage.setItem('auth_role', role);
+    localStorage.setItem('auth_nombre', auth.nombre || '');
     
     this.currentUserSubject.next({
-      id: '', // Se llenará al llamar a getVendorProfile() o similar
-      nombre: '',
+      id: '',
+      nombre: auth.nombre || '',
       email: auth.email,
-      role: auth.role
+      role: role
     });
+  }
+
+  private getRoleFromToken(token: string): string | null {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return null;
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      return payload.role || payload.roles || null;
+    } catch (e) {
+      console.error('Error decoding JWT token', e);
+      return null;
+    }
   }
 
   loadSession(): void {
     const token = this.getToken();
     const email = localStorage.getItem('auth_email');
     const role = localStorage.getItem('auth_role');
+    const nombre = localStorage.getItem('auth_nombre');
 
     if (token && email && role) {
       this.currentUserSubject.next({
         id: '',
-        nombre: '',
+        nombre: nombre || '',
         email,
         role
       });
@@ -83,10 +133,15 @@ export class AuthService {
     return localStorage.getItem('auth_token');
   }
 
+  getNombre(): string {
+    return localStorage.getItem('auth_nombre') || '';
+  }
+
   logout(): void {
     localStorage.removeItem('auth_token');
     localStorage.removeItem('auth_email');
     localStorage.removeItem('auth_role');
+    localStorage.removeItem('auth_nombre');
     this.currentUserSubject.next(null);
   }
 
