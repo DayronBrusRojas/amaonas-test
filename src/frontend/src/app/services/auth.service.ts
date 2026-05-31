@@ -57,14 +57,19 @@ export class AuthService {
           subscriber.complete();
         },
         error: (err) => {
-          const errMsg = err?.error?.message || err?.error || '';
-          if (typeof errMsg === 'string' && (errMsg.includes('Usuario no encontrado') || errMsg.includes('no encontrado'))) {
+          console.log('Client login failed, checking fallback. Error:', err);
+          const errMsg = typeof err?.error === 'string' ? err.error : (err?.error?.message || '');
+          const isWrongPassword = errMsg.toLowerCase().includes('contraseña') || errMsg.toLowerCase().includes('password');
+          
+          if (!isWrongPassword) {
+            console.log('Attempting vendor login fallback...');
             this.vendorLogin(request).subscribe({
               next: (response) => {
                 subscriber.next(response);
                 subscriber.complete();
               },
               error: (vendorErr) => {
+                console.log('Vendor login fallback failed. Error:', vendorErr);
                 subscriber.error(vendorErr);
               }
             });
