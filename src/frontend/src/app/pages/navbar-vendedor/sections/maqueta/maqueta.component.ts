@@ -1,7 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ComboboxInputComponent } from './combobox-input/combobox-input.component';
+import { MaquetaService } from '../../../../services/maqueta.service';
+import { FileService } from '../../../../services/file.service';
+import { MaterialService } from '../../../../services/material.service';
+import { PurchaseRequestService } from '../../../../services/purchase-request.service';
+import { Product, ProductRequest, ProductMaterialDetail } from '../../../../models/product.model';
+import { Material } from '../../../../models/material.model';
 
 export type FormTab = 'catalogo' | 'nueva';
 
@@ -30,6 +36,13 @@ export interface ProductoSinSolicitud {
   imagenUrl: string;
 }
 
+export interface MaquetaMaterialItem {
+  nombre: string;
+  cantidadSugerida: number;
+  esOpcional: boolean;
+  notas: string;
+}
+
 export interface NuevaMaquetaForm {
   nombre: string;
   categoria: string;
@@ -37,6 +50,9 @@ export interface NuevaMaquetaForm {
   gradoEscolar: string;
   descripcion: string;
   maquetaSeleccionada: string;
+  materiales: MaquetaMaterialItem[];
+  stock: number;
+  materialesReciclables: boolean;
 }
 
 @Component({
@@ -46,7 +62,16 @@ export interface NuevaMaquetaForm {
   templateUrl: './maqueta.component.html',
   styleUrl: './maqueta.component.css',
 })
-export class MaquetaComponent {
+export class MaquetaComponent implements OnInit {
+  private readonly maquetaService = inject(MaquetaService);
+  private readonly fileService = inject(FileService);
+  private readonly materialService = inject(MaterialService);
+  private readonly purchaseRequestService = inject(PurchaseRequestService);
+
+  products: Product[] = [];
+  inventoryMaterials: Material[] = [];
+  loading = false;
+  saving = false;
 
   stats: MaquetaStat[] = [
     {
@@ -59,14 +84,14 @@ export class MaquetaComponent {
     {
       id: 'disponibles',
       label: 'Maquetas Disponibles',
-      value: 12,
+      value: 0,
       valueColor: '#8b5cf6',
       iconColor: '#8b5cf6',
     },
     {
       id: 'sin-configurar',
       label: 'Sin Configurar',
-      value: 12,
+      value: 0,
       valueColor: '#f97316',
       iconColor: '#f97316',
     },
@@ -101,7 +126,7 @@ export class MaquetaComponent {
     {
       id: 'sin-solicitudes',
       label: 'Sin Solicitudes',
-      value: 12,
+      value: 0,
       valueColor: '#f97316',
       icon: 'alert-circle',
       iconColor: '#f97316',
@@ -128,20 +153,7 @@ export class MaquetaComponent {
     'Tecnología':    '#64748b',
   };
 
-  productosSinSolicitudes: ProductoSinSolicitud[] = [
-    { id: '1',  nombre: 'Sistema Digestivo',   categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/digestivo/200/130'   },
-    { id: '2',  nombre: 'Célula Animal',        categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/celula/200/130'      },
-    { id: '3',  nombre: 'Colegio Primaria',    categoria: 'Arquitectura',  imagenUrl: 'https://picsum.photos/seed/primaria/200/130'    },
-    { id: '4',  nombre: 'Colegio Secundaria',  categoria: 'Arquitectura',  imagenUrl: 'https://picsum.photos/seed/secundaria/200/130'  },
-    { id: '5',  nombre: 'Sistema Solar',       categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/solar/200/130'       },
-    { id: '6',  nombre: 'Ciclo del Agua',      categoria: 'Educativo',     imagenUrl: 'https://picsum.photos/seed/agua/200/130'        },
-    { id: '7',  nombre: 'Volcán en Erupción', categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/volcan/200/130'      },
-    { id: '8',  nombre: 'Alfabeto Braille',    categoria: 'Inclusivo',     imagenUrl: 'https://picsum.photos/seed/braille/200/130'     },
-    { id: '9',  nombre: 'Mapamundi Táctil',    categoria: 'Inclusivo',     imagenUrl: 'https://picsum.photos/seed/mapamundi/200/130'   },
-    { id: '10', nombre: 'Capas de la Tierra',  categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/tierra/200/130'      },
-    { id: '11', nombre: 'ADN - Estructura',    categoria: 'Ciencia',       imagenUrl: 'https://picsum.photos/seed/adn/200/130'         },
-    { id: '12', nombre: 'Ecosistema Acuático', categoria: 'Educativo',     imagenUrl: 'https://picsum.photos/seed/ecosistema/200/130'  },
-  ];
+  productosSinSolicitudes: ProductoSinSolicitud[] = [];
 
   getCategoriaColor(cat: string): string {
     return this.categoriaColorMap[cat] ?? '#64748b';
@@ -160,10 +172,198 @@ export class MaquetaComponent {
     gradoEscolar: '',
     descripcion: '',
     maquetaSeleccionada: '',
+    materiales: [],
+    stock: 10,
+    materialesReciclables: false
   };
 
   get configuradas(): number {
     return this.stats.find(s => s.id === 'configuradas')?.value ?? 0;
+  }
+
+  ngOnInit(): void {
+    this.refreshAllData();
+  }
+
+  refreshAllData(): void {
+    this.loading = true;
+
+    // 1. Cargar todos los materiales para el combobox
+    this.materialService.getAllMaterials().subscribe({
+      next: (materials) => {
+        this.inventoryMaterials = materials;
+      },
+      error: (err) => console.error('Error al cargar materiales:', err)
+    });
+
+    // 2. Cargar maquetas (productos)
+    this.maquetaService.getProducts('', '', 0, 100).subscribe({
+      next: (page) => {
+        this.products = page.content;
+
+        // Actualizar estadísticas superiores
+        const total = this.products.length;
+        const disponibles = this.products.filter(p => p.stock > 0).length;
+        const sinConfigurar = this.products.filter(p => p.stock === 0).length;
+
+        this.stats = this.stats.map(s => {
+          if (s.id === 'configuradas') return { ...s, value: total };
+          if (s.id === 'disponibles') return { ...s, value: disponibles };
+          if (s.id === 'sin-configurar') return { ...s, value: sinConfigurar };
+          return s;
+        });
+
+        // Actualizar categorías dinámicas para el autocompletado
+        const uniqueCats = Array.from(new Set(this.products.map(p => p.categoriaNombre).filter(Boolean)));
+        this.categorias = Array.from(new Set([...['Educativa', 'Arquitectura', 'Ciencia', 'Tecnología'], ...uniqueCats]));
+
+        // 3. Cargar solicitudes de compra y calcular métricas
+        this.loadRequestsData();
+      },
+      error: (err) => {
+        console.error('Error al cargar maquetas:', err);
+        this.loading = false;
+      }
+    });
+  }
+
+  loadRequestsData(): void {
+    this.purchaseRequestService.listarTodas().subscribe({
+      next: (requests) => {
+        const totalReqs = requests.length;
+
+        // IDs únicos de productos con alguna solicitud
+        const requestedProductIds = new Set(requests.map(r => r.productoId).filter(Boolean));
+        const numProductsRequested = requestedProductIds.size;
+
+        // Calcular categoría de maqueta más popular
+        const categoryCounts: Record<string, number> = {};
+        requests.forEach(r => {
+          let cat = '';
+          if (r.productoId) {
+            const prod = this.products.find(p => p.id === r.productoId);
+            if (prod) {
+              cat = prod.categoriaNombre;
+            }
+          }
+          if (cat) {
+            categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+          }
+        });
+
+        let popularCategoryName = 'Ninguna';
+        let popularCategoryCount = 0;
+        Object.entries(categoryCounts).forEach(([cat, count]) => {
+          if (count > popularCategoryCount) {
+            popularCategoryCount = count;
+            popularCategoryName = cat;
+          }
+        });
+
+        // Filtrar productos sin solicitudes en absoluto
+        this.productosSinSolicitudes = this.products
+          .filter(p => !requestedProductIds.has(p.id))
+          .map(p => ({
+            id: p.id,
+            nombre: p.titulo,
+            categoria: p.categoriaNombre || 'Sin Categoría',
+            imagenUrl: p.imageUrl
+          }));
+
+        // Población de stats del análisis de productos
+        this.analisisStats = this.analisisStats.map(stat => {
+          if (stat.id === 'total-solicitudes') {
+            return { ...stat, value: totalReqs };
+          }
+          if (stat.id === 'productos-solicitados') {
+            return { ...stat, value: numProductsRequested };
+          }
+          if (stat.id === 'categoria-popular') {
+            return {
+              ...stat,
+              value: popularCategoryName,
+              subtext: `${popularCategoryCount} solicitudes`
+            };
+          }
+          if (stat.id === 'sin-solicitudes') {
+            return { ...stat, value: this.productosSinSolicitudes.length };
+          }
+          return stat;
+        });
+
+        this.loading = false;
+      },
+      error: (err) => {
+        console.warn('No se pudieron cargar solicitudes de compra (puede requerir autenticación):', err.status);
+
+        // Fallback: mostrar todos los productos como "sin solicitudes"
+        this.productosSinSolicitudes = this.products.map(p => ({
+          id: p.id,
+          nombre: p.titulo,
+          categoria: p.categoriaNombre || 'Sin Categoría',
+          imagenUrl: p.imageUrl
+        }));
+
+        this.analisisStats = this.analisisStats.map(stat => {
+          if (stat.id === 'sin-solicitudes') {
+            return { ...stat, value: this.productosSinSolicitudes.length };
+          }
+          return stat;
+        });
+
+        this.loading = false;
+      }
+    });
+  }
+
+  onMaquetaSeleccionadaChange(): void {
+    const selectedId = this.form.maquetaSeleccionada;
+    if (!selectedId) {
+      this.form.nombre = '';
+      this.form.categoria = '';
+      this.form.ocasion = '';
+      this.form.gradoEscolar = '';
+      this.form.descripcion = '';
+      this.form.stock = 10;
+      this.form.materialesReciclables = false;
+      this.form.materiales = [];
+      this.imagenPreviewUrl = null;
+      this.imagenFile = null;
+      return;
+    }
+
+    this.loading = true;
+    this.maquetaService.getProductById(selectedId).subscribe({
+      next: (product) => {
+        this.form.nombre = product.titulo;
+        this.form.categoria = product.categoriaNombre || product.categoriaId;
+        this.form.ocasion = product.ocasion && product.ocasion.length > 0 ? product.ocasion[0] : '';
+        this.form.gradoEscolar = product.gradoEscolar || '';
+        this.form.descripcion = product.descripcion || '';
+        this.form.stock = product.stock || 0;
+        this.form.materialesReciclables = product.materialesReciclables || false;
+
+        // Mapear materiales
+        if (product.materialesDetalle && product.materialesDetalle.length > 0) {
+          this.form.materiales = product.materialesDetalle.map((md: ProductMaterialDetail) => ({
+            nombre: md.nombre,
+            cantidadSugerida: md.cantidadSugerida || 1,
+            esOpcional: md.esOpcional || false,
+            notas: md.notas || ''
+          }));
+        } else {
+          this.form.materiales = [];
+        }
+
+        this.imagenPreviewUrl = product.imageUrl || null;
+        this.imagenFile = null;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar detalle del producto del catálogo:', err);
+        this.loading = false;
+      }
+    });
   }
 
   abrirForm(): void {
@@ -188,6 +388,24 @@ export class MaquetaComponent {
     this.imagenPreviewUrl = null;
   }
 
+  agregarMaterial(): void {
+    if (!this.form.materiales) {
+      this.form.materiales = [];
+    }
+    this.form.materiales.push({
+      nombre: '',
+      cantidadSugerida: 1,
+      esOpcional: false,
+      notas: ''
+    });
+  }
+
+  eliminarMaterial(index: number): void {
+    if (this.form.materiales) {
+      this.form.materiales.splice(index, 1);
+    }
+  }
+
   cancelar(): void {
     this.showForm = false;
     this.imagenFile = null;
@@ -199,11 +417,95 @@ export class MaquetaComponent {
       gradoEscolar: '',
       descripcion: '',
       maquetaSeleccionada: '',
+      materiales: [],
+      stock: 10,
+      materialesReciclables: false
     };
   }
 
   guardar(): void {
-    // placeholder: se conectará al backend en una siguiente etapa
-    this.cancelar();
+    if (!this.form.nombre || !this.form.categoria) {
+      alert('Por favor completa los campos obligatorios: Nombre de la Maqueta y Categoría.');
+      return;
+    }
+
+    if (this.formTab === 'nueva' && !this.imagenFile && !this.imagenPreviewUrl) {
+      alert('La imagen de la maqueta es obligatoria.');
+      return;
+    }
+
+    this.saving = true;
+
+    // Subir imagen a Cloudinary si se seleccionó un archivo nuevo
+    if (this.imagenFile) {
+      this.fileService.uploadImage(this.imagenFile).subscribe({
+        next: (res) => {
+          this.procederAGuardar(res.url);
+        },
+        error: (err) => {
+          console.error('Error al subir imagen a Cloudinary:', err);
+          alert('Hubo un error al subir la imagen. Por favor, intenta de nuevo.');
+          this.saving = false;
+        }
+      });
+    } else {
+      this.procederAGuardar(this.imagenPreviewUrl || '');
+    }
+  }
+
+  private procederAGuardar(imageUrl: string): void {
+    const materialesRequest = (this.form.materiales || [])
+      .filter(m => m.nombre.trim() !== '')
+      .map(m => ({
+        nombre: m.nombre,
+        cantidadSugerida: m.cantidadSugerida,
+        esOpcional: m.esOpcional,
+        notas: m.notas
+      }));
+
+    const productRequest: ProductRequest = {
+      titulo: this.form.nombre,
+      descripcion: this.form.descripcion,
+      descripcionDetallada: this.form.descripcion,
+      categoriaId: this.form.categoria,
+      imageUrl: imageUrl,
+      materiales: materialesRequest,
+      gradoEscolar: this.form.gradoEscolar,
+      ocasion: this.form.ocasion ? [this.form.ocasion] : [],
+      materialesReciclables: this.form.materialesReciclables,
+      stock: this.form.stock || 0
+    };
+
+    if (this.formTab === 'catalogo' && this.form.maquetaSeleccionada) {
+      // Actualizar maqueta existente
+      this.maquetaService.updateProduct(this.form.maquetaSeleccionada, productRequest).subscribe({
+        next: () => {
+          alert('Maqueta actualizada correctamente.');
+          this.saving = false;
+          this.cancelar();
+          this.refreshAllData();
+        },
+        error: (err) => {
+          console.error('Error al actualizar la maqueta en el backend:', err);
+          alert('Hubo un error al actualizar la maqueta.');
+          this.saving = false;
+        }
+      });
+    } else {
+      // Crear nueva maqueta
+      this.maquetaService.createProduct(productRequest).subscribe({
+        next: () => {
+          alert('Maqueta creada y configurada correctamente.');
+          this.saving = false;
+          this.cancelar();
+          this.refreshAllData();
+        },
+        error: (err) => {
+          console.error('Error al registrar la maqueta en el backend:', err);
+          alert('Hubo un error al registrar la maqueta.');
+          this.saving = false;
+        }
+      });
+    }
   }
 }
