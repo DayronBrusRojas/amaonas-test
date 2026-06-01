@@ -3,6 +3,7 @@ import { Component, EventEmitter, Output } from '@angular/core';
 import { DashboardComponent } from './sections/dashboard/dashboard.component';
 import { MaquetaComponent } from './sections/maqueta/maqueta.component';
 import { GestionStockComponent } from './sections/gestion-stock/gestion-stock.component';
+import { MaterialesComponent } from './sections/materiales/materiales.component';
 
 export type VendedorTab =
   | 'dashboard'
@@ -22,7 +23,7 @@ export interface NavItem {
 @Component({
   selector: 'app-navbar-vendedor',
   standalone: true,
-  imports: [CommonModule, DashboardComponent, MaquetaComponent, GestionStockComponent],
+  imports: [CommonModule, DashboardComponent, MaquetaComponent, GestionStockComponent, MaterialesComponent],
   templateUrl: './navbar-vendedor.component.html',
   styleUrl: './navbar-vendedor.component.css',
 })
@@ -32,6 +33,7 @@ export class NavbarVendedorComponent {
   @Output() salir = new EventEmitter<void>();
 
   activeTab: VendedorTab = 'dashboard';
+  mobileMenuOpen = false;
 
   navItems: NavItem[] = [
     { id: 'dashboard',     label: 'Dashboard',        icon: 'grid'        },
@@ -45,6 +47,11 @@ export class NavbarVendedorComponent {
 
   setTab(tab: VendedorTab): void {
     this.activeTab = tab;
+    this.mobileMenuOpen = false;
+  }
+
+  toggleMobileMenu(): void {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
   }
 
   get activeLabel(): string {
