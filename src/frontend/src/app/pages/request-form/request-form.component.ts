@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ModelItem } from '../data/model';
+import { PurchaseRequestService } from '../../services/purchase-request.service';
+import { PurchaseRequestRequest } from '../../models/purchase-request.model';
 
 export type RequestMode = 'personalizar' | 'comprar';
 
@@ -36,6 +38,8 @@ export interface SavedRequest {
   styleUrl: './request-form.component.css'
 })
 export class RequestFormComponent {
+
+  private readonly requestService = inject(PurchaseRequestService);
 
   @Input({ required: true }) model!: ModelItem;
   @Input({ required: true }) mode!: RequestMode;
@@ -193,7 +197,6 @@ export class RequestFormComponent {
   }
 
   submitRequest(): void {
-
     const request: SavedRequest = {
       id: Date.now(),
       mode: this.mode,
@@ -227,15 +230,69 @@ export class RequestFormComponent {
           : undefined
     };
 
-    const saved = this.getSavedRequests();
+    // Construct the backend request matching V1__init_schema.sql and DTOs
+    const reqBody: PurchaseRequestRequest = {
+      clienteNombre: this.form.fullName.trim(),
+      clienteEmail: this.form.email.trim(),
+      clienteTelefono: this.form.phone.trim(),
+      mensaje: !this.isCustomization ? this.form.message : undefined,
+      productoId: this.model?.id || undefined,
+      isKit: false,
+      isCustom: this.isCustomization,
+      descripcionPersonalizacion: this.isCustomization ? this.form.description : undefined,
+      materialesDeseados: this.isCustomization
+        ? [this.form.otherMaterials, ...this.selectedExtras].filter(Boolean).join(', ')
+        : undefined,
+      solicitarExplicacion: this.form.explanation,
+      tipoEvento: this.form.explanation ? this.form.explanationType : undefined,
+      cantidadPersonas: this.form.explanation && this.requiresExplanationPeople ? this.form.explanationPeople : undefined,
+      materialesCustomizados: [],
+      materialesPersonales: [],
+      materialesPreferidos: []
+    };
 
-    localStorage.setItem(
-      'maquetasRequests',
-      JSON.stringify([request, ...saved])
-    );
+    if (this.isCustomization && this.model?.rawProduct?.materialesDetalle) {
+      const details: any[] = this.model.rawProduct.materialesDetalle;
+      this.selectedMaterials.forEach((matName) => {
+        const found = details.find((d: any) => d.nombre === matName);
+        if (found) {
+          reqBody.materialesCustomizados?.push({
+            materialId: found.materialId,
+            cantidad: found.cantidadSugerida || 1
+          });
+        } else {
+          reqBody.materialesPersonales?.push({
+            materialName: matName,
+            cantidad: 1,
+            descripcion: 'Material personalizado'
+          });
+        }
+      });
+    }
 
-    this.successMessage = 'Solicitud enviada correctamente.';
-    this.submitted.emit(request);
+    this.requestService.crear(reqBody).subscribe({
+      next: (response) => {
+        console.log('Solicitud creada en backend con éxito', response);
+        const saved = this.getSavedRequests();
+        localStorage.setItem(
+          'maquetasRequests',
+          JSON.stringify([request, ...saved])
+        );
+
+        this.successMessage = 'Solicitud enviada correctamente.';
+        this.submitted.emit(request);
+      },
+      error: (err) => {
+        console.error('Error al crear solicitud en el backend', err);
+        const saved = this.getSavedRequests();
+        localStorage.setItem(
+          'maquetasRequests',
+          JSON.stringify([request, ...saved])
+        );
+        this.successMessage = 'Solicitud enviada (modo local temporal).';
+        this.submitted.emit(request);
+      }
+    });
   }
 
   private getSavedRequests(): SavedRequest[] {
