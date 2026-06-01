@@ -22,13 +22,16 @@ public interface ProductRepository extends JpaRepository<Product, UUID> {
            "WHERE (:categoriaId IS NULL OR c.id = :categoriaId) AND " +
            "(CAST(:search AS string) IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
            "OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
+           "OR LOWER(c.nombre) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
            "OR LOWER(m.nombre) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))",
            countQuery = "SELECT COUNT(DISTINCT p) FROM Product p " +
            "LEFT JOIN p.materiales pm " +
            "LEFT JOIN pm.material m " +
-           "WHERE (:categoriaId IS NULL OR p.categoria.id = :categoriaId) AND " +
+           "LEFT JOIN p.categoria c " +
+           "WHERE (:categoriaId IS NULL OR c.id = :categoriaId) AND " +
            "(CAST(:search AS string) IS NULL OR LOWER(p.titulo) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
            "OR LOWER(p.descripcion) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
+           "OR LOWER(c.nombre) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')) " +
            "OR LOWER(m.nombre) LIKE LOWER(CONCAT('%', CAST(:search AS string), '%')))")
     Page<Product> searchProducts(
             @Param("categoriaId") String categoriaId,
