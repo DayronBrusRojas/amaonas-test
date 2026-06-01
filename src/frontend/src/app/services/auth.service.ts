@@ -125,6 +125,12 @@ export class AuthService {
     const nombre = localStorage.getItem('auth_nombre');
 
     if (token && email && role) {
+      // Verificar si el token ya expiro antes de restaurar la sesion
+      if (this.isTokenExpired(token)) {
+        console.warn('Token expirado detectado al iniciar. Limpiando sesion.');
+        this.logout();
+        return;
+      }
       this.currentUserSubject.next({
         id: '',
         nombre: nombre || '',
@@ -147,14 +153,35 @@ export class AuthService {
     localStorage.removeItem('auth_email');
     localStorage.removeItem('auth_role');
     localStorage.removeItem('auth_nombre');
+    sessionStorage.clear();
     this.currentUserSubject.next(null);
   }
 
   isLoggedIn(): boolean {
-    return this.getToken() !== null;
+    const token = this.getToken();
+    if (!token) return false;
+    if (this.isTokenExpired(token)) {
+      this.logout();
+      return false;
+    }
+    return true;
   }
 
   getUserRole(): string | null {
     return localStorage.getItem('auth_role');
+  }
+
+  /** Decodifica el JWT y verifica si el claim `exp` ya paso. */
+  private isTokenExpired(token: string): boolean {
+    try {
+      const parts = token.split('.');
+      if (parts.length !== 3) return true;
+      const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+      if (!payload.exp) return false; // Sin exp → no expira
+      // exp esta en segundos, Date.now() en milisegundos
+      return Date.now() >= payload.exp * 1000;
+    } catch {
+      return true; // Token malformado → tratar como expirado
+    }
   }
 }
