@@ -9,12 +9,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.amazonas.backend.modules.categories.dto.CategoryResponse;
+import com.amazonas.backend.modules.categories.model.Category;
 import com.amazonas.backend.modules.categories.repository.CategoryRepository;
 
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/categories")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class CategoryController {
 
@@ -26,6 +28,9 @@ public class CategoryController {
                 .stream()
                 .map(c -> new CategoryResponse(c.getId(), c.getNombre(), c.getDescripcion(), c.getOrden()))
                 .collect(Collectors.toList());
+    @GetMapping("/categories")
+    public ResponseEntity<List<Category>> getAllCategories() {
+        List<Category> categories = categoryRepository.findAllByOrderByOrdenAsc();
         return ResponseEntity.ok(categories);
     }
 }
