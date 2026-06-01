@@ -7,6 +7,18 @@
   background: linear-gradient(180deg, #f8fbfa 0%, #f7f2fb 100%);
 }
 
+.request-page.standalone-layout {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 20px 70px;
+}
+
+.request-page.standalone-layout .form-column {
+  width: 100%;
+  max-width: 600px;
+}
+
 .preview-column {
   position: sticky;
   top: 88px;
