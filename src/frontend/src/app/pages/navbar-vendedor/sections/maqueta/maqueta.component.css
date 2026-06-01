@@ -537,6 +537,8 @@
    ANÁLISIS DE PRODUCTOS
 ═══════════════════════════════════════════════════════════════ */
 .analisis-section {
+  padding-left: 20px;
+  padding-right: 20px;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -1082,3 +1084,208 @@
   }
 }
 
+
+
+/* ===============================================================
+   IMPROVED MATERIAL ROW & CALCULATION RESUMEN CARD
+   =============================================================== */
+.materiales-list-improved {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.material-item-row-improved {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-bottom: 16px;
+  border-bottom: 1px dashed #e2e8f0;
+}
+
+.material-item-row-improved:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.row-main-inputs {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1.2fr 1.2fr auto;
+  gap: 16px;
+  align-items: flex-end;
+}
+
+.col-material-select {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.col-material-qty {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.col-material-cost {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.col-material-delete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.read-only-cost-box {
+  display: flex;
+  align-items: center;
+  height: 38px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0 12px;
+  font-size: 13.5px;
+  color: #475569;
+  font-weight: 500;
+  pointer-events: none;
+}
+
+.btn-eliminar-material-improved {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ef4444;
+  transition: background 0.15s, color 0.15s;
+  height: 38px;
+  width: 38px;
+}
+
+.btn-eliminar-material-improved:hover {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.row-subtotals {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: #64748b;
+  font-weight: 500;
+  padding-left: 2px;
+}
+
+.subtotal-divider {
+  color: #cbd5e1;
+}
+
+/* --- CARD RESUMEN DE COSTOS Y MARGEN --- */
+.costos-resumen-card {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 18px 24px;
+  margin-top: 8px;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.01);
+}
+
+.resumen-row {
+  display: flex;
+  gap: 40px;
+}
+
+.resumen-col {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.resumen-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.resumen-val {
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.purchase-val {
+  color: #2563eb; /* Royal blue */
+}
+
+.sale-val {
+  color: #16a34a; /* Emerald green */
+}
+
+.resumen-divider {
+  border-bottom: 1px solid #e2e8f0;
+  margin: 14px 0;
+}
+
+.resumen-footer {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.margen-label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.margen-val {
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.margen-percent {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  margin-left: 2px;
+}
+
+/* RESPONSIVE LAYOUT FOR IMPROVED MATERIALS */
+@media (max-width: 820px) {
+  .row-main-inputs {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  
+  .col-material-select {
+    grid-column: span 2;
+  }
+  
+  .col-material-delete {
+    grid-column: span 2;
+    width: 100%;
+  }
+  
+  .btn-eliminar-material-improved {
+    width: 100%;
+  }
+  
+  .resumen-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+}

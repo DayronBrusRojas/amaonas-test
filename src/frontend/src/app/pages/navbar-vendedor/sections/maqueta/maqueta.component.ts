@@ -114,7 +114,7 @@ export class MaquetaComponent implements OnInit {
     },
     {
       id: 'categoria-popular',
-      label: 'CategorÃ­a Popular',
+      label: 'Categoría Popular',
       value: 'N/A',
       valueColor: '#8b5cf6',
       subtext: '0 solicitudes',
@@ -402,6 +402,51 @@ export class MaquetaComponent implements OnInit {
     }
   }
 
+  getMaterialInfo(nombre: string): any {
+    return this.inventoryMaterials.find(m => m.nombre === nombre);
+  }
+
+  getMaterialCostoCompra(nombre: string): number {
+    const mat = this.getMaterialInfo(nombre);
+    return mat ? mat.costoCompra : 0;
+  }
+
+  getMaterialCostoVenta(nombre: string): number {
+    const mat = this.getMaterialInfo(nombre);
+    return mat ? mat.costoVenta : 0;
+  }
+
+  getMaterialUnidad(nombre: string): string {
+    const mat = this.getMaterialInfo(nombre);
+    return mat ? mat.unidad : '';
+  }
+
+  calcularCostoTotalCompra(): number {
+    if (!this.form.materiales) return 0;
+    return this.form.materiales.reduce((total, m) => {
+      const costo = this.getMaterialCostoCompra(m.nombre);
+      return total + (costo * (m.cantidadSugerida || 0));
+    }, 0);
+  }
+
+  calcularCostoTotalVenta(): number {
+    if (!this.form.materiales) return 0;
+    return this.form.materiales.reduce((total, m) => {
+      const costo = this.getMaterialCostoVenta(m.nombre);
+      return total + (costo * (m.cantidadSugerida || 0));
+    }, 0);
+  }
+
+  calcularMargen(): number {
+    return this.calcularCostoTotalVenta() - this.calcularCostoTotalCompra();
+  }
+
+  calcularMargenPorcentaje(): number {
+    const venta = this.calcularCostoTotalVenta();
+    if (venta === 0) return 0;
+    return (this.calcularMargen() / venta) * 100;
+  }
+
   cancelar(): void {
     this.showForm = false;
     this.imagenFile = null;
@@ -505,4 +550,5 @@ export class MaquetaComponent implements OnInit {
     }
   }
 }
+
 
