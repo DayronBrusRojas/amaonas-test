@@ -62,3 +62,11 @@ export interface PageResponse<T> {
   last: boolean;
   empty: boolean;
 }
+
+export interface ProductAnalysisItem {
+  productoId: string;
+  titulo: string;
+  categoriaNombre: string;
+  imageUrl: string;
+  totalSolicitudes: number;
+}

@@ -1,12 +1,11 @@
-import { CommonModule } from '@angular/common';
+﻿import { CommonModule } from '@angular/common';
 import { Component, OnInit, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ComboboxInputComponent } from './combobox-input/combobox-input.component';
 import { MaquetaService } from '../../../../services/maqueta.service';
 import { FileService } from '../../../../services/file.service';
 import { MaterialService } from '../../../../services/material.service';
-import { PurchaseRequestService } from '../../../../services/purchase-request.service';
-import { Product, ProductRequest, ProductMaterialDetail } from '../../../../models/product.model';
+import { Product, ProductRequest, ProductMaterialDetail, ProductAnalysisItem } from '../../../../models/product.model';
 import { Material } from '../../../../models/material.model';
 
 export type FormTab = 'catalogo' | 'nueva';
@@ -66,7 +65,6 @@ export class MaquetaComponent implements OnInit {
   private readonly maquetaService = inject(MaquetaService);
   private readonly fileService = inject(FileService);
   private readonly materialService = inject(MaterialService);
-  private readonly purchaseRequestService = inject(PurchaseRequestService);
 
   products: Product[] = [];
   inventoryMaterials: Material[] = [];
@@ -116,7 +114,7 @@ export class MaquetaComponent implements OnInit {
     },
     {
       id: 'categoria-popular',
-      label: 'Categoría Popular',
+      label: 'CategorÃ­a Popular',
       value: 'N/A',
       valueColor: '#8b5cf6',
       subtext: '0 solicitudes',
@@ -133,11 +131,11 @@ export class MaquetaComponent implements OnInit {
     },
   ];
 
-  categorias: string[] = ['Educativa', 'Arquitectura', 'Ciencia', 'Tecnología'];
+  categorias: string[] = ['Educativa', 'Arquitectura', 'Ciencia', 'TecnologÃ­a'];
 
   ocasionesOptions: string[] = [
-    'Feria Escolar', 'Exposición', 'Concurso', 'Proyecto de Clase',
-    'Evento Cultural', 'Día Científico', 'Presentación Final',
+    'Feria Escolar', 'ExposiciÃ³n', 'Concurso', 'Proyecto de Clase',
+    'Evento Cultural', 'DÃ­a CientÃ­fico', 'PresentaciÃ³n Final',
   ];
 
   gradosOptions: string[] = [
@@ -150,10 +148,11 @@ export class MaquetaComponent implements OnInit {
     'Arquitectura':  '#64748b',
     'Educativo':     '#64748b',
     'Inclusivo':     '#3b82f6',
-    'Tecnología':    '#64748b',
+    'TecnologÃ­a':    '#64748b',
   };
 
   productosSinSolicitudes: ProductoSinSolicitud[] = [];
+  topProductos: ProductAnalysisItem[] = [];
 
   getCategoriaColor(cat: string): string {
     return this.categoriaColorMap[cat] ?? '#64748b';
@@ -201,7 +200,7 @@ export class MaquetaComponent implements OnInit {
       next: (page) => {
         this.products = page.content;
 
-        // Actualizar estadísticas superiores
+        // Actualizar estadÃ­sticas superiores
         const total = this.products.length;
         const disponibles = this.products.filter(p => p.stock > 0).length;
         const sinConfigurar = this.products.filter(p => p.stock === 0).length;
@@ -213,12 +212,12 @@ export class MaquetaComponent implements OnInit {
           return s;
         });
 
-        // Actualizar categorías dinámicas para el autocompletado
+        // Actualizar categorÃ­as dinÃ¡micas para el autocompletado
         const uniqueCats = Array.from(new Set(this.products.map(p => p.categoriaNombre).filter(Boolean)));
-        this.categorias = Array.from(new Set([...['Educativa', 'Arquitectura', 'Ciencia', 'Tecnología'], ...uniqueCats]));
+        this.categorias = Array.from(new Set([...['Educativa', 'Arquitectura', 'Ciencia', 'TecnologÃ­a'], ...uniqueCats]));
 
-        // 3. Cargar solicitudes de compra y calcular métricas
-        this.loadRequestsData();
+        // 3. Cargar anÃ¡lisis de productos y calcular mÃ©tricas
+        this.loadAnalysisData();
       },
       error: (err) => {
         console.error('Error al cargar maquetas:', err);
@@ -227,27 +226,20 @@ export class MaquetaComponent implements OnInit {
     });
   }
 
-  loadRequestsData(): void {
-    this.purchaseRequestService.listarTodas().subscribe({
-      next: (requests) => {
-        const totalReqs = requests.length;
+  loadAnalysisData(): void {
+    this.maquetaService.getProductAnalysis().subscribe({
+      next: (analysisItems) => {
+        // 1. Total Solicitudes (Suma de todas las solicitudes)
+        const totalReqs = analysisItems.reduce((sum, item) => sum + item.totalSolicitudes, 0);
 
-        // IDs únicos de productos con alguna solicitud
-        const requestedProductIds = new Set(requests.map(r => r.productoId).filter(Boolean));
-        const numProductsRequested = requestedProductIds.size;
+        // 2. Productos solicitados (cantidad de productos con solicitudes > 0)
+        const numProductsRequested = analysisItems.filter(item => item.totalSolicitudes > 0).length;
 
-        // Calcular categoría de maqueta más popular
+        // 3. Calcular categoría popular (la categoría con mayor suma de solicitudes)
         const categoryCounts: Record<string, number> = {};
-        requests.forEach(r => {
-          let cat = '';
-          if (r.productoId) {
-            const prod = this.products.find(p => p.id === r.productoId);
-            if (prod) {
-              cat = prod.categoriaNombre;
-            }
-          }
-          if (cat) {
-            categoryCounts[cat] = (categoryCounts[cat] || 0) + 1;
+        analysisItems.forEach(item => {
+          if (item.totalSolicitudes > 0 && item.categoriaNombre) {
+            categoryCounts[item.categoriaNombre] = (categoryCounts[item.categoriaNombre] || 0) + item.totalSolicitudes;
           }
         });
 
@@ -260,17 +252,22 @@ export class MaquetaComponent implements OnInit {
           }
         });
 
-        // Filtrar productos sin solicitudes en absoluto
-        this.productosSinSolicitudes = this.products
-          .filter(p => !requestedProductIds.has(p.id))
-          .map(p => ({
-            id: p.id,
-            nombre: p.titulo,
-            categoria: p.categoriaNombre || 'Sin Categoría',
-            imagenUrl: p.imageUrl
+        // 4. Filtrar productos sin solicitudes (totalSolicitudes === 0)
+        this.productosSinSolicitudes = analysisItems
+          .filter(item => item.totalSolicitudes === 0)
+          .map(item => ({
+            id: item.productoId,
+            nombre: item.titulo,
+            categoria: item.categoriaNombre || 'Sin Categoría',
+            imagenUrl: item.imageUrl
           }));
 
-        // Población de stats del análisis de productos
+        // 5. Guardar productos con solicitudes para el Top (ordenados por totalSolicitudes desc)
+        this.topProductos = analysisItems
+          .filter(item => item.totalSolicitudes > 0)
+          .sort((a, b) => b.totalSolicitudes - a.totalSolicitudes);
+
+        // 6. Actualizar stats del análisis de productos
         this.analisisStats = this.analisisStats.map(stat => {
           if (stat.id === 'total-solicitudes') {
             return { ...stat, value: totalReqs };
@@ -294,15 +291,15 @@ export class MaquetaComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.warn('No se pudieron cargar solicitudes de compra (puede requerir autenticación):', err.status);
-
-        // Fallback: mostrar todos los productos como "sin solicitudes"
+        console.error('Error al cargar análisis de productos:', err);
+        // Fallback: mostrar todos los productos como sin solicitudes
         this.productosSinSolicitudes = this.products.map(p => ({
           id: p.id,
           nombre: p.titulo,
           categoria: p.categoriaNombre || 'Sin Categoría',
           imagenUrl: p.imageUrl
         }));
+        this.topProductos = [];
 
         this.analisisStats = this.analisisStats.map(stat => {
           if (stat.id === 'sin-solicitudes') {
@@ -310,7 +307,6 @@ export class MaquetaComponent implements OnInit {
           }
           return stat;
         });
-
         this.loading = false;
       }
     });
@@ -360,7 +356,7 @@ export class MaquetaComponent implements OnInit {
         this.loading = false;
       },
       error: (err) => {
-        console.error('Error al cargar detalle del producto del catálogo:', err);
+        console.error('Error al cargar detalle del producto del catÃ¡logo:', err);
         this.loading = false;
       }
     });
@@ -425,7 +421,7 @@ export class MaquetaComponent implements OnInit {
 
   guardar(): void {
     if (!this.form.nombre || !this.form.categoria) {
-      alert('Por favor completa los campos obligatorios: Nombre de la Maqueta y Categoría.');
+      alert('Por favor completa los campos obligatorios: Nombre de la Maqueta y CategorÃ­a.');
       return;
     }
 
@@ -436,7 +432,7 @@ export class MaquetaComponent implements OnInit {
 
     this.saving = true;
 
-    // Subir imagen a Cloudinary si se seleccionó un archivo nuevo
+    // Subir imagen a Cloudinary si se seleccionÃ³ un archivo nuevo
     if (this.imagenFile) {
       this.fileService.uploadImage(this.imagenFile).subscribe({
         next: (res) => {
@@ -509,3 +505,4 @@ export class MaquetaComponent implements OnInit {
     }
   }
 }
+

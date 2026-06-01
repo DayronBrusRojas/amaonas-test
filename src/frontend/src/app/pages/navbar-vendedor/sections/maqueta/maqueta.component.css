@@ -771,6 +771,147 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════
+   PRODUCTOS MÁS SOLICITADOS
+   ═══════════════════════════════════════════════════════════════ */
+.top-sol-panel {
+  background: #f0fdf4; /* soft light green / emerald */
+  border: 1px solid #bbf7d0;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.top-sol-header-inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.top-sol-icon {
+  width: 18px;
+  height: 18px;
+  stroke: #16a34a;
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex-shrink: 0;
+}
+
+.top-sol-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #14532d;
+}
+
+.top-sol-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 14px;
+}
+
+.top-sol-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #dcfce7;
+  border-radius: 10px;
+  padding: 10px;
+  transition: transform 0.15s, box-shadow 0.15s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
+}
+
+.top-sol-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.top-sol-img-wrap {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 8px;
+}
+
+.top-sol-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  background: #f1f5f9;
+}
+
+.top-sol-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top-sol-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a2a3a;
+  margin: 0;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.top-sol-cat {
+  font-size: 11px;
+  margin: 0;
+  font-weight: 500;
+}
+
+.top-sol-badge {
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 6px;
+  padding: 4px 8px;
+  margin-top: 4px;
+  width: fit-content;
+}
+
+.badge-number {
+  font-size: 14px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.badge-label {
+  font-size: 10px;
+  font-weight: 500;
+  color: #15803d;
+}
+
+@media (max-width: 1100px) {
+  .top-sol-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .top-sol-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .top-sol-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 /* ===============================================================
    LOADER OVERLAY & SPINNERS
    =============================================================== */

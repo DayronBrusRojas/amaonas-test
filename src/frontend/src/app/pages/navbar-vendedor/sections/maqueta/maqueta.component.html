@@ -375,16 +375,50 @@
       }
     </div>
 
-    <div class="analisis-empty-card">
-      <div class="analisis-empty-icon-wrap">
-        <svg viewBox="0 0 24 24" class="analisis-empty-icon" aria-hidden="true">
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
-          <line x1="12" y1="22.08" x2="12" y2="12"/>
-        </svg>
+    <!-- ── PRODUCTOS MÁS SOLICITADOS ── -->
+    @if (topProductos.length > 0) {
+      <div class="top-sol-panel">
+        <div class="top-sol-header-inline">
+          <svg viewBox="0 0 24 24" class="top-sol-icon" aria-hidden="true">
+            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/>
+            <polyline points="17 6 23 6 23 12"/>
+          </svg>
+          <span class="top-sol-title">Productos Más Solicitados</span>
+        </div>
+        <div class="top-sol-grid">
+          @for (prod of topProductos; track prod.productoId) {
+            <div class="top-sol-card">
+              <div class="top-sol-img-wrap">
+                <img class="top-sol-img" [src]="prod.imageUrl" [alt]="prod.titulo" loading="lazy">
+              </div>
+              <div class="top-sol-info">
+                <p class="top-sol-name">{{ prod.titulo }}</p>
+                <p class="top-sol-cat" [style.color]="getCategoriaColor(prod.categoriaNombre)">
+                  {{ prod.categoriaNombre }}
+                </p>
+                <div class="top-sol-badge">
+                  <span class="badge-number">{{ prod.totalSolicitudes }}</span>
+                  <span class="badge-label">solicitudes</span>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
       </div>
-      <p class="analisis-empty-text">No hay solicitudes registradas aún</p>
-    </div>
+    }
+
+    @if (topProductos.length === 0 && productosSinSolicitudes.length === 0) {
+      <div class="analisis-empty-card">
+        <div class="analisis-empty-icon-wrap">
+          <svg viewBox="0 0 24 24" class="analisis-empty-icon" aria-hidden="true">
+            <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+            <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+            <line x1="12" y1="22.08" x2="12" y2="12"/>
+          </svg>
+        </div>
+        <p class="analisis-empty-text">No hay solicitudes registradas aún</p>
+      </div>
+    }
 
     <!-- ── PRODUCTOS SIN SOLICITUDES ── -->
     @if (productosSinSolicitudes.length > 0) {
