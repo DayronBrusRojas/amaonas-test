@@ -42,7 +42,8 @@ public class User implements UserDetails {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
-    @Column(name = "telefono", length = 15)
+    @jakarta.validation.constraints.Pattern(regexp = "^[0-9]{9}$", message = "El teléfono debe tener estrictamente 9 dígitos")
+    @Column(name = "telefono", length = 9)
     private String telefono;
 
     @Enumerated(EnumType.STRING)

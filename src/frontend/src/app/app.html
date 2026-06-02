@@ -47,7 +47,18 @@
     [initialView]="authView"
     (closed)="closeAuth()"
     (authenticated)="completeLogin($event)"
+    (forgotPassword)="page = 'forgot-password'"
     ></app-auth>
+
+  <app-forgot-password
+    *ngIf="page === 'forgot-password'"
+    (backToLogin)="showLogin()"
+  ></app-forgot-password>
+
+  <app-reset-password
+    *ngIf="page === 'reset-password'"
+    (success)="showLogin()"
+  ></app-reset-password>
   <app-request-form
     *ngIf="page === 'request'"
     [model]="selectedModel"

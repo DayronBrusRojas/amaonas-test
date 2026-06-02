@@ -15,16 +15,27 @@ import com.amazonas.backend.modules.vendors.model.Vendor;
 import com.amazonas.backend.modules.vendors.repository.VendorRepository;
 import com.amazonas.backend.security.jwt.JwtService;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+import org.springframework.transaction.annotation.Transactional;
+import com.amazonas.backend.modules.auth.model.PasswordResetToken;
+import com.amazonas.backend.modules.auth.repository.PasswordResetTokenRepository;
+import com.amazonas.backend.modules.auth.service.EmailService;
+
 import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
+    private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(AuthServiceImpl.class);
+
     private final UserRepository userRepository;
     private final VendorRepository vendorRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
+    private final PasswordResetTokenRepository tokenRepository;
+    private final EmailService emailService;
 
     @Override
     public AuthResponse register(RegisterRequest request) {
@@ -103,5 +114,83 @@ public class AuthServiceImpl implements AuthService {
         String email = jwtService.extractUsername(token);
         return vendorRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Vendor no encontrado con el token provisto"));
+    }
+
+    @Override
+    @Transactional
+    public void processForgotPassword(String email) {
+        String name = "";
+        String userType = "";
+
+        // Buscar primero en Users
+        var userOpt = userRepository.findByEmail(email);
+        if (userOpt.isPresent()) {
+            name = userOpt.get().getNombre();
+            userType = "USER";
+        } else {
+            // Si no esta en Users, buscar en Vendors
+            var vendorOpt = vendorRepository.findByEmail(email);
+            if (vendorOpt.isPresent()) {
+                name = vendorOpt.get().getNombre();
+                userType = "VENDOR";
+            } else {
+                throw new RuntimeException("No se encontro ninguna cuenta asociada a este correo electronico.");
+            }
+        }
+
+        // Eliminar token anterior si existe para este correo
+        tokenRepository.findByEmail(email).ifPresent(tokenRepository::delete);
+
+        // Generar nuevo token seguro
+        String token = UUID.randomUUID().toString();
+        PasswordResetToken resetToken = new PasswordResetToken();
+        resetToken.setToken(token);
+        resetToken.setEmail(email);
+        resetToken.setUserType(userType);
+        resetToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+
+        tokenRepository.save(resetToken);
+
+        // Enviar correo de recuperacion de forma real y obligatoria
+        emailService.sendPasswordResetEmail(email, token, name);
+    }
+
+    @Override
+    public boolean validatePasswordResetToken(String token) {
+        var tokenOpt = tokenRepository.findByToken(token);
+        if (tokenOpt.isEmpty()) {
+            return false;
+        }
+        return !tokenOpt.get().isExpired();
+    }
+
+    @Override
+    @Transactional
+    public void updatePassword(String token, String newPassword) {
+        PasswordResetToken resetToken = tokenRepository.findByToken(token)
+                .orElseThrow(() -> new RuntimeException("Token de recuperacion no valido o inexistente."));
+
+        if (resetToken.isExpired()) {
+            tokenRepository.delete(resetToken);
+            throw new RuntimeException("El token de recuperacion ha expirado.");
+        }
+
+        String email = resetToken.getEmail();
+        String userType = resetToken.getUserType();
+
+        if ("USER".equalsIgnoreCase(userType)) {
+            User user = userRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Usuario asociado al token no encontrado."));
+            user.setPassword(passwordEncoder.encode(newPassword));
+            userRepository.save(user);
+        } else if ("VENDOR".equalsIgnoreCase(userType)) {
+            Vendor vendor = vendorRepository.findByEmail(email)
+                    .orElseThrow(() -> new RuntimeException("Vendedor asociado al token no encontrado."));
+            vendor.setPassword(passwordEncoder.encode(newPassword));
+            vendorRepository.save(vendor);
+        }
+
+        // Eliminar el token usado
+        tokenRepository.delete(resetToken);
     }
 }

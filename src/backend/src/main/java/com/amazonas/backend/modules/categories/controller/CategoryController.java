@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/categories")
-@RequestMapping("/api")
 @RequiredArgsConstructor
 public class CategoryController {
 
@@ -28,6 +27,9 @@ public class CategoryController {
                 .stream()
                 .map(c -> new CategoryResponse(c.getId(), c.getNombre(), c.getDescripcion(), c.getOrden()))
                 .collect(Collectors.toList());
+        return ResponseEntity.ok(categories);
+    }
+
     @GetMapping("/categories")
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryRepository.findAllByOrderByOrdenAsc();

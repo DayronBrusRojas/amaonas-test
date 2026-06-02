@@ -12,8 +12,11 @@ import com.amazonas.backend.modules.auth.dto.AuthResponse;
 import com.amazonas.backend.modules.auth.dto.LoginRequest;
 import com.amazonas.backend.modules.auth.dto.LoginVendorRequest;
 import com.amazonas.backend.modules.auth.dto.RegisterRequest;
+import com.amazonas.backend.modules.auth.dto.ForgotPasswordRequest;
+import com.amazonas.backend.modules.auth.dto.ResetPasswordRequest;
 import com.amazonas.backend.modules.auth.service.AuthService;
 import com.amazonas.backend.modules.vendors.model.Vendor;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,5 +50,22 @@ public class AuthController {
     @GetMapping("/vendor/me")
     public ResponseEntity<Vendor> getVendorMe(@RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(authService.getRemoteVendor(token));
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<Void> forgotPassword(@jakarta.validation.Valid @RequestBody ForgotPasswordRequest request) {
+        authService.processForgotPassword(request.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/reset-password/validate")
+    public ResponseEntity<Boolean> validateResetToken(@RequestParam("token") String token) {
+        return ResponseEntity.ok(authService.validatePasswordResetToken(token));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@jakarta.validation.Valid @RequestBody ResetPasswordRequest request) {
+        authService.updatePassword(request.getToken(), request.getNewPassword());
+        return ResponseEntity.ok().build();
     }
 }

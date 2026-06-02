@@ -3,6 +3,7 @@ import { Component, EventEmitter, Input, OnChanges, Output, SimpleChanges, injec
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { AuthResponse } from '../../models/auth.model';
+import { Router } from '@angular/router';
 
 type AuthView = 'login' | 'register';
 
@@ -23,12 +24,14 @@ interface UserAccount {
 export class Auth implements OnChanges {
 
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
 
   @Input() accessNotice = '';
   @Input() initialView: AuthView = 'login';
 
   @Output() closed = new EventEmitter<void>();
   @Output() authenticated = new EventEmitter<UserAccount>();
+  @Output() forgotPassword = new EventEmitter<void>();
 
   view: AuthView = 'login';
   recoverySent = false;
@@ -153,15 +156,9 @@ export class Auth implements OnChanges {
   }
 
   sendRecovery(): void {
-    this.clearMessages();
-
-    if (!this.login.email.trim()) {
-      this.errorMessage = 'Escribe tu correo electrónico para recuperar tu cuenta.';
-      return;
-    }
-
-    this.recoverySent = true;
-    this.successMessage = 'Se envió un enlace de recuperación (simulado).';
+    this.closeModal();
+    this.forgotPassword.emit();
+    this.router.navigate(['/forgot-password']);
   }
 
   private clearMessages(): void {

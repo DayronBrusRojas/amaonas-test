@@ -18,7 +18,7 @@ public class RegisterRequest {
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
-    @Size(max = 15, message = "El teléfono debe tener como máximo 15 caracteres")
+    @jakarta.validation.constraints.Pattern(regexp = "^[0-9]{9}$", message = "El teléfono debe tener estrictamente 9 dígitos")
     private String telefono;
 
     // =========================

@@ -135,6 +135,10 @@
   font-size: 14px;
 }
 
+.request-card input.input-error {
+  border-color: #e53e3e;
+}
+
 .request-card input:focus,
 .request-card textarea:focus,
 .request-card select:focus {

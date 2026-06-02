@@ -12,4 +12,8 @@ public interface AuthService {
     AuthResponse login(LoginRequest request);
     AuthResponse vendorLogin(LoginVendorRequest request);
     Vendor getRemoteVendor(String token);
+    
+    void processForgotPassword(String email);
+    boolean validatePasswordResetToken(String token);
+    void updatePassword(String token, String newPassword);
 }

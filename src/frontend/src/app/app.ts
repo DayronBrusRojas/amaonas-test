@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { Subscription } from 'rxjs';
+import { Router } from '@angular/router';
 import { Auth } from './pages/auth/auth';
 import { CatalogDetailComponent } from './pages/catalog-detail/catalog-detail.component';
 import { CatalogComponent } from './pages/catalog/catalog.component';
@@ -14,8 +15,10 @@ import { MyRequestsComponent } from './pages/my-requests/my-requests.component';
 import { RequestFormComponent, RequestMode, SavedRequest, SessionUser } from './pages/request-form/request-form.component';
 import { BuscadorInteligente } from './pages/shared/components/buscador-inteligente/buscador-inteligente';
 import { AuthService } from './services/auth.service';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { ResetPasswordComponent } from './pages/reset-password/reset-password.component';
 
-type PageView = 'inicio' | 'nosotros' |'catalog' | 'detail' | 'auth' | 'request' | 'requests'|'vendedor';
+type PageView = 'inicio' | 'nosotros' |'catalog' | 'detail' | 'auth' | 'request' | 'requests'|'vendedor' | 'forgot-password' | 'reset-password';
 type AuthView = 'login' | 'register';
 
 @Component({
@@ -33,7 +36,9 @@ type AuthView = 'login' | 'register';
     Nosotros,
     MyRequestsComponent,
     RequestFormComponent,
-    BuscadorInteligente
+    BuscadorInteligente,
+    ForgotPasswordComponent,
+    ResetPasswordComponent
   ],
   templateUrl: './app.html',
   styleUrl: './app.css'
@@ -41,6 +46,7 @@ type AuthView = 'login' | 'register';
 export class AppComponent implements OnInit, OnDestroy {
   
   private readonly authService = inject(AuthService);
+  private readonly router = inject(Router);
   private userSub?: Subscription;
 
   page: PageView = 'inicio';
@@ -72,6 +78,14 @@ export class AppComponent implements OnInit, OnDestroy {
       if (role === 'ADMIN') {
         this.page = 'vendedor';
       }
+    }
+
+    // Verificar si estamos en ruta de recuperar password
+    const path = window.location.pathname;
+    if (path === '/reset-password') {
+      this.page = 'reset-password';
+    } else if (path === '/forgot-password') {
+      this.page = 'forgot-password';
     }
   }
 
@@ -162,6 +176,7 @@ openStandaloneRequest(): void {
     this.accessNotice = '';
     this.authView = 'login';
     this.page = 'auth';
+    this.router.navigate(['/']);
   }
 
   showRegister(): void {

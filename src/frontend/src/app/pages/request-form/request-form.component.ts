@@ -124,7 +124,7 @@ export class RequestFormComponent {
 
     this.form.fullName = this.user?.name || this.form.fullName || 'Juan';
     this.form.email = this.user?.email || this.form.email || 'juan@gmail.com';
-    this.form.phone = this.form.phone || '+51 999 999 999';
+    this.form.phone = this.form.phone || '999999999';
 
     // Evita error si model aún no existe
     if (this.model?.materials) {
